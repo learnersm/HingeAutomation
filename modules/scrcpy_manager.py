@@ -94,4 +94,12 @@ class ScrcpyManager:
         """
         Check if scrcpy process is running
         """
-        return self.process is not None and self.process.poll() is None
+        if self.process is not None and self.process.poll() is None:
+            return True
+
+        # Also check if scrcpy is running via pgrep
+        try:
+            result = subprocess.run(['pgrep', 'scrcpy'], capture_output=True, text=True)
+            return result.returncode == 0
+        except Exception:
+            return False

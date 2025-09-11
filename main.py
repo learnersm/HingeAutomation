@@ -52,11 +52,11 @@ def main():
         print("STEP 2: WINDOW IDENTIFICATION")
         print("="*60)
         print("Please make the scrcpy window ACTIVE (click on it)")
-        print("You have 10 seconds...")
+        print("You have 5 seconds...")
         print("="*60)
 
-        # Wait 10 seconds for user to activate the window
-        for i in range(10, 0, -1):
+        # Wait 5 seconds for user to activate the window
+        for i in range(5, 0, -1):
             print(f"\rTime remaining: {i} seconds", end="", flush=True)
             time.sleep(1)
         print("\rWindow activation time complete!     ")
@@ -76,8 +76,26 @@ def main():
         logging.info("Active window identified and dimensions obtained successfully.")
         print(f"Window dimensions: {dimensions['width']}x{dimensions['height']} at ({dimensions['left']}, {dimensions['top']})")
 
+        # Set window bounds for handlers
+        interaction_handler.set_window_bounds(dimensions)
+        screenshot_handler.set_window_bounds(dimensions)
+
+        # Step 4: Open the Hinge app manually
+        print("\n" + "="*60)
+        print("STEP 4: OPENING HINGE APP")
+        print("="*60)
+        print("Please manually open the Hinge app on your device:")
+        print("1. Look at the scrcpy window showing your Android device")
+        print("2. Find and tap the Hinge app icon")
+        print("3. Wait for the Hinge app to fully load")
+        print("4. Press Enter here when ready to continue...")
+
+        input("Press Enter to continue with automation...")
+        logging.info("User confirmed Hinge app is open")
+        print("Continuing with automation...")
+
         # Placeholder for remaining steps
-        # TODO: Implement steps 3-7 from project outline
+        # TODO: Implement steps 5-7 from project outline
 
     except Exception as e:
         logging.error(f"Main workflow error: {e}")

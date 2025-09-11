@@ -123,6 +123,50 @@ class WindowDetector:
             logging.error(f"Error checking window status: {e}")
             return False
 
+    def get_active_window(self):
+        """
+        Get the currently active window
+        """
+        if not PYGETWINDOW_AVAILABLE:
+            logging.error("pygetwindow not installed. Cannot detect active window.")
+            return False
+
+        try:
+            # For macOS, getActiveWindow() returns a string (title), not a window object
+            active_title = gw.getActiveWindow()
+            if active_title:
+                logging.info(f"Active window title: {active_title}")
+
+                # Create a simple window-like object with the title and geometry
+                # Since macOS implementation is incomplete, we'll work with what we have
+                geometry = gw.getWindowGeometry(active_title)
+                if geometry:
+                    # Create a simple object to hold window properties
+                    class SimpleWindow:
+                        def __init__(self, title, left, top, width, height):
+                            self.title = title
+                            self.left = left
+                            self.top = top
+                            self.width = width
+                            self.height = height
+                            self.right = left + width
+                            self.bottom = top + height
+                            self.isActive = True
+                            self.visible = True
+
+                    self.window = SimpleWindow(active_title, geometry[0], geometry[1], geometry[2], geometry[3])
+                    logging.info(f"Active window object created: {self.window.title}")
+                    return True
+                else:
+                    logging.error("Could not get window geometry")
+                    return False
+            else:
+                logging.error("No active window found")
+                return False
+        except Exception as e:
+            logging.error(f"Error getting active window: {e}")
+            return False
+
     def activate_window(self):
         """
         Bring window to foreground

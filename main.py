@@ -47,10 +47,24 @@ def main():
 
         logging.info("scrcpy launched successfully. Automation ready to proceed.")
 
-        # Step 2: Identify the open window
-        logging.info("Starting Hinge Automation - Step 2: Identifying the open window")
-        if not window_detector.find_window():
-            logging.error("Failed to find scrcpy window. Exiting.")
+        # Step 2: Identify the active window
+        print("\n" + "="*60)
+        print("STEP 2: WINDOW IDENTIFICATION")
+        print("="*60)
+        print("Please make the scrcpy window ACTIVE (click on it)")
+        print("You have 10 seconds...")
+        print("="*60)
+
+        # Wait 10 seconds for user to activate the window
+        for i in range(10, 0, -1):
+            print(f"\rTime remaining: {i} seconds", end="", flush=True)
+            time.sleep(1)
+        print("\rWindow activation time complete!     ")
+
+        # Get the active window
+        logging.info("Detecting active window...")
+        if not window_detector.get_active_window():
+            logging.error("Failed to get active window. Exiting.")
             return
 
         # Get window dimensions
@@ -59,7 +73,8 @@ def main():
             logging.error("Failed to get window dimensions. Exiting.")
             return
 
-        logging.info("Window identified and dimensions obtained successfully.")
+        logging.info("Active window identified and dimensions obtained successfully.")
+        print(f"Window dimensions: {dimensions['width']}x{dimensions['height']} at ({dimensions['left']}, {dimensions['top']})")
 
         # Placeholder for remaining steps
         # TODO: Implement steps 3-7 from project outline

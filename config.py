@@ -38,7 +38,6 @@ DAILY_LIMIT_MESSAGE = "Limit of daily profiles reached"
 
 # Scrcpy settings
 SCRCPY_OPTIONS = [
-    "--no-control",
     "--window-title=HingeAutomation",
     "--max-size=1080",
     "--video-bit-rate=8M"

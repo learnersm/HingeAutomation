@@ -53,10 +53,10 @@ class ScreenshotHandler:
             if self.window_bounds:
                 # Capture specific region
                 region = (
-                    self.window_bounds['left'],
-                    self.window_bounds['top'],
-                    self.window_bounds['width'],
-                    self.window_bounds['height']
+                    int(self.window_bounds['left']),
+                    int(self.window_bounds['top']),
+                    int(self.window_bounds['width']),
+                    int(self.window_bounds['height'])
                 )
                 logging.info(f"Capturing screenshot of region: {region}")
                 screenshot = pyautogui.screenshot(region=region)
@@ -130,3 +130,40 @@ class ScreenshotHandler:
 
         except Exception as e:
             logging.error(f"Error cleaning up screenshots: {e}")
+
+    def compare_screenshots(self, screenshot1_path, screenshot2_path):
+        """
+        Compare two screenshots to check if they are identical
+        Returns True if identical, False otherwise
+        """
+        if not PIL_AVAILABLE:
+            logging.error("PIL not available. Cannot compare screenshots.")
+            return False
+
+        try:
+            img1 = Image.open(screenshot1_path)
+            img2 = Image.open(screenshot2_path)
+
+            # Check if images are identical
+            if img1.size != img2.size:
+                return False
+
+            # Compare pixel by pixel
+            diff = Image.new("RGB", img1.size)
+            diff_pixels = []
+            for x in range(img1.width):
+                for y in range(img1.height):
+                    if img1.getpixel((x, y)) != img2.getpixel((x, y)):
+                        diff_pixels.append((x, y))
+
+            # If less than 1% of pixels differ, consider identical
+            total_pixels = img1.width * img1.height
+            diff_percentage = len(diff_pixels) / total_pixels
+            is_identical = diff_percentage < 0.01
+
+            logging.info(f"Screenshot comparison: {diff_percentage:.2%} difference, identical: {is_identical}")
+            return is_identical
+
+        except Exception as e:
+            logging.error(f"Error comparing screenshots: {e}")
+            return False

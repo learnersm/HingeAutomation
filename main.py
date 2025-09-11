@@ -18,6 +18,7 @@ from screenshot_handler import ScreenshotHandler
 from profile_analyzer import ProfileAnalyzer
 from comment_generator import CommentGenerator
 from error_handler import ErrorHandler
+from config import TIMEOUTS
 
 def main():
     """
@@ -94,8 +95,77 @@ def main():
         logging.info("User confirmed Hinge app is open")
         print("Continuing with automation...")
 
+        # Step 5: Wait for first profile to load
+        print("\n" + "="*60)
+        print("STEP 5: WAITING FOR PROFILE TO LOAD")
+        print("="*60)
+        logging.info("Waiting for profile to load...")
+        time.sleep(TIMEOUTS["profile_load"])
+        logging.info("Profile load wait complete")
+
+        # Step 6: Take screenshots of profile with scrolling
+        print("\n" + "="*60)
+        print("STEP 6: CAPTURING PROFILE SCREENSHOTS")
+        print("="*60)
+
+        profile_screenshots = []
+
+        # Take first screenshot
+        logging.info("Taking first profile screenshot")
+        first_screenshot = screenshot_handler.capture_screenshot("profile_001.png")
+        if first_screenshot:
+            profile_screenshots.append(first_screenshot)
+            logging.info(f"First screenshot captured: {first_screenshot}")
+        else:
+            logging.error("Failed to capture first screenshot")
+            return
+
+        # Scroll and take more screenshots
+        max_scrolls = 10  # Prevent infinite loop
+        scroll_count = 0
+        previous_screenshot = first_screenshot
+
+        while scroll_count < max_scrolls:
+            # Perform scroll (swipe up to scroll down)
+            start_y = dimensions['height'] * 3 // 4
+            end_y = dimensions['height'] // 4
+            center_x = dimensions['width'] // 2
+
+            logging.info(f"Performing scroll {scroll_count + 1}")
+            if not interaction_handler.swipe(center_x, start_y, center_x, end_y):
+                logging.error("Failed to perform scroll")
+                break
+
+            # Wait for scroll to complete
+            time.sleep(TIMEOUTS["scroll_wait"])
+
+            # Take new screenshot
+            screenshot_num = len(profile_screenshots) + 1
+            new_screenshot = screenshot_handler.capture_screenshot(f"profile_{screenshot_num:03d}.png")
+
+            if not new_screenshot:
+                logging.error("Failed to capture screenshot after scroll")
+                break
+
+            # Check if screenshot is different (new content)
+            if screenshot_handler.compare_screenshots(previous_screenshot, new_screenshot):
+                logging.info("Screenshots are identical, reached end of profile")
+                # Remove the identical screenshot
+                os.remove(new_screenshot)
+                break
+            else:
+                profile_screenshots.append(new_screenshot)
+                previous_screenshot = new_screenshot
+                logging.info(f"New screenshot captured: {new_screenshot}")
+
+            scroll_count += 1
+
+        logging.info(f"Profile screenshot capture complete. Total screenshots: {len(profile_screenshots)}")
+        for screenshot in profile_screenshots:
+            logging.info(f"Profile screenshot: {screenshot}")
+
         # Placeholder for remaining steps
-        # TODO: Implement steps 5-7 from project outline
+        # TODO: Implement steps 7 from project outline
 
     except Exception as e:
         logging.error(f"Main workflow error: {e}")

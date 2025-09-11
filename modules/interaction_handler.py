@@ -72,7 +72,7 @@ class InteractionHandler:
 
             logging.info(f"Swiping from ({start_screen_x}, {start_screen_y}) to ({end_screen_x}, {end_screen_y})")
             pyautogui.moveTo(start_screen_x, start_screen_y)
-            pyautogui.dragTo(end_screen_x, end_screen_y, duration=duration)
+            pyautogui.dragTo(end_screen_x, end_screen_y, duration=duration, button='left')
             time.sleep(TIMEOUTS["interaction_delay"])
             return True
         except Exception as e:

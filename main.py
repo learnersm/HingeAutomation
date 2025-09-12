@@ -48,19 +48,20 @@ def main():
 
         logging.info("scrcpy launched successfully. Automation ready to proceed.")
 
-        # Step 2: Identify the active window
+        # Step 2: Identify the active window and prepare Hinge app
         print("\n" + "="*60)
-        print("STEP 2: WINDOW IDENTIFICATION")
+        print("STEP 2: WINDOW & APP PREPARATION")
         print("="*60)
-        print("Please make the scrcpy window ACTIVE (click on it)")
-        print("You have 5 seconds...")
+        print("Please do BOTH of the following within 10 seconds:")
+        print("1. Make the scrcpy window ACTIVE (click on it)")
+        print("2. Open the Hinge app on your device")
         print("="*60)
 
-        # Wait 5 seconds for user to activate the window
-        for i in range(5, 0, -1):
+        # Wait 10 seconds for user to activate window and open Hinge app
+        for i in range(10, 0, -1):
             print(f"\rTime remaining: {i} seconds", end="", flush=True)
             time.sleep(1)
-        print("\rWindow activation time complete!     ")
+        print("\rPreparation time complete!     ")
 
         # Get the active window
         logging.info("Detecting active window...")
@@ -81,18 +82,7 @@ def main():
         interaction_handler.set_window_bounds(dimensions)
         screenshot_handler.set_window_bounds(dimensions)
 
-        # Step 4: Open the Hinge app manually
-        print("\n" + "="*60)
-        print("STEP 4: OPENING HINGE APP")
-        print("="*60)
-        print("Please manually open the Hinge app on your device:")
-        print("1. Look at the scrcpy window showing your Android device")
-        print("2. Find and tap the Hinge app icon")
-        print("3. Wait for the Hinge app to fully load")
-        print("4. Press Enter here when ready to continue...")
-
-        input("Press Enter to continue with automation...")
-        logging.info("User confirmed Hinge app is open")
+        logging.info("Window and Hinge app preparation complete")
         print("Continuing with automation...")
 
         # Step 5: Wait for first profile to load

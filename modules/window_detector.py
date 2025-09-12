@@ -141,6 +141,22 @@ class WindowDetector:
                 # Since macOS implementation is incomplete, we'll work with what we have
                 geometry = gw.getWindowGeometry(active_title)
                 if geometry:
+                    left, top, width, height = geometry
+                    logging.info(f"Raw window geometry: left={left}, top={top}, width={width}, height={height}")
+
+                    # On macOS, sometimes the geometry includes window decorations
+                    # Let's try to get a more accurate region by checking all windows
+                    try:
+                        all_windows = gw.getAllWindows()
+                        for win in all_windows:
+                            if win.title == active_title:
+                                # Use the actual window object if available
+                                left, top, width, height = win.left, win.top, win.width, win.height
+                                logging.info(f"Using window object geometry: left={left}, top={top}, width={width}, height={height}")
+                                break
+                    except Exception as e:
+                        logging.warning(f"Could not get window object geometry, using getWindowGeometry: {e}")
+
                     # Create a simple object to hold window properties
                     class SimpleWindow:
                         def __init__(self, title, left, top, width, height):
@@ -154,8 +170,9 @@ class WindowDetector:
                             self.isActive = True
                             self.visible = True
 
-                    self.window = SimpleWindow(active_title, geometry[0], geometry[1], geometry[2], geometry[3])
+                    self.window = SimpleWindow(active_title, left, top, width, height)
                     logging.info(f"Active window object created: {self.window.title}")
+                    logging.info(f"Final window bounds: left={left}, top={top}, width={width}, height={height}")
                     return True
                 else:
                     logging.error("Could not get window geometry")

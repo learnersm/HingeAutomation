@@ -18,7 +18,7 @@ TIMEOUTS = {
 }
 
 # Rating settings
-RATING_THRESHOLD = 7
+RATING_THRESHOLD = 6
 MAX_RATING = 10
 
 # Screenshot settings

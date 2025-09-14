@@ -5,6 +5,9 @@ FutureExpansionPoints
 P0
 ------
 Work end to end for an app. Hinge to start with 
+- Fix the analysiss results, right now its defaulting to 5 - most likely because of errors during parsing.
+- Add net time taken for a single profile evaluation
+- Right now execution stops after crossing out a profile, it should continue till limit of profiles reached for the day
 - Also chat with people already in match list
 - Notify user when the user is ready for a date
 - Suggest places nearby - activities based on match's interest ( activities / dinner )

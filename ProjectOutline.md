@@ -8,7 +8,6 @@ Steps
 - Take the first screenshot
 - Now scroll sufficiently so that what you see on screen is new content , that is non overlapping with the previous screenshot
 - Take the next screenshot, continue doing this until you reach the end of the profile and cannot scroll any further
-- Keep note of the actual screenshots that sum up her profile.
 7. Now use the screenshots that represent her profile as an input and answer these questions
 - Identify the girl who's profile it is. Many a times girls can have group pictures making it hard to identify the actual girl. given you have all the screenshots of the profile, you should be able to pinpoint the girl
 - Now rate the girl on a scale of 1 to 10.

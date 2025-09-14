@@ -104,13 +104,46 @@ class CommentGenerator:
             bool: True if clicked successfully
         """
         try:
-            # Heart icon is typically at bottom of photo
-            center_x = handler.window_bounds['width'] // 2
-            heart_y = handler.window_bounds['height'] * 3 // 4  # Bottom quarter
+            # Get heart button coordinates from UI detector
+            from ui_detector import get_ui_detector
+            ui_detector = get_ui_detector()
+            heart_x, heart_y = ui_detector.get_heart_button_coords()
+            logging.info(f"Using heart button coordinates: ({heart_x}, {heart_y})")
 
-            logging.info(f"Clicking heart icon at ({center_x}, {heart_y})")
-            time.sleep(0.5)  # Wait for UI to respond
-            return handler.click_at(center_x, heart_y)
+            # Take screenshot before clicking heart for comparison
+            from screenshot_handler import ScreenshotHandler
+            screenshot_handler = ScreenshotHandler()
+            screenshot_handler.set_window_bounds(handler.window_bounds)
+            before_heart_screenshot = screenshot_handler.capture_screenshot("before_heart_click.png")
+
+            logging.info(f"Clicking heart icon at ({heart_x}, {heart_y})")
+            success = handler.click_at(heart_x, heart_y)
+
+            if success:
+                # Wait for UI to respond
+                time.sleep(1.0)
+
+                # Take screenshot after clicking heart to check if screen changed
+                after_heart_screenshot = screenshot_handler.capture_screenshot("after_heart_click.png")
+
+                if before_heart_screenshot and after_heart_screenshot:
+                    if screenshot_handler.compare_screenshots(before_heart_screenshot, after_heart_screenshot):
+                        logging.warning("⚠️ ALERT: No screen content change detected after clicking heart/like icon!")
+                        logging.warning("The heart icon click may have failed or the comment interface did not open")
+                    else:
+                        logging.info("Screen content changed after heart click - comment interface opened successfully")
+
+                    # Clean up temporary screenshots
+                    try:
+                        import os
+                        if os.path.exists(before_heart_screenshot):
+                            os.remove(before_heart_screenshot)
+                        if os.path.exists(after_heart_screenshot):
+                            os.remove(after_heart_screenshot)
+                    except Exception as e:
+                        logging.debug(f"Could not clean up temporary screenshots: {e}")
+
+            return success
 
         except Exception as e:
             logging.error(f"Failed to click heart icon: {e}")

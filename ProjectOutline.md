@@ -12,10 +12,11 @@ Steps
 - Note that we need to Identify the girl who's profile picture it is. Many a times girls can have group pictures making it hard to identify the actual girl. Given you have all the screenshots of the profile, you should be able to pinpoint the girl. For this step, just provide the screenshots to the LLM layer and ask it the required questions.
 - Now rate the girl on a scale of 1 to 10.
 8. Perform action on the profile, use the LLM layer to find the required buttons to click
-- In case the rating is < 7 , move to the next profile. i.e. click on cross. Repeat steps for the next profile
+- In case the rating is < 7 , move to the next profile. i.e. click on cross [absolute cordinates (X,Y):(810,854)]. Repeat steps for the next profile
 - In case the rating is >= 7, then click on like/heart button that you see
     - [In case we clicked like] Then analyse all the text in the profile and the images in the profile and create an understanding about the girl
-    - Now create a witty comment (under 150 characters) to spark her interest based on your understanding of the girl, and reply to the first photo in the profile
+    - Now create a witty comment (under 150 characters) to spark her interest based on your understanding of the girl
+    - Click the heart icon on the last picture in the profile [absolute cordinates (X,Y):(1107,779)]
     - After clicking on the heart icon, you will see a box saying add a comment
     - Click on the box
     - Paste your crafted comment in this box. 

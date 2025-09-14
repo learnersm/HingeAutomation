@@ -18,6 +18,7 @@ from screenshot_handler import ScreenshotHandler
 from profile_analyzer import ProfileAnalyzer
 from comment_generator import CommentGenerator
 from error_handler import ErrorHandler
+from ui_detector import get_ui_detector
 from config import TIMEOUTS
 
 def cleanup_screenshots():
@@ -86,6 +87,7 @@ def main():
     profile_analyzer = ProfileAnalyzer()
     comment_generator = CommentGenerator()
     error_handler = ErrorHandler()
+    ui_detector = get_ui_detector()
 
     try:
         # Step 1: Run scrcpy in a terminal
@@ -268,12 +270,39 @@ def main():
         else:
             # Skip to next profile by clicking cross
             logging.info("Skipping profile - clicking cross")
-            # Assume cross button is at top right of profile
-            cross_x = dimensions['width'] * 9 // 10  # Right side
-            cross_y = dimensions['height'] // 10     # Top area
+
+            # Take screenshot before clicking cross for comparison
+            before_cross_screenshot = screenshot_handler.capture_screenshot("before_cross_click.png")
+
+            # Get cross button coordinates from UI detector
+            cross_x, cross_y = ui_detector.get_cross_button_coords()
+            logging.info(f"Using cross button coordinates: ({cross_x}, {cross_y})")
 
             if interaction_handler.click_at(cross_x, cross_y):
                 logging.info("Cross clicked - moving to next profile")
+
+                # Wait a moment for UI to respond
+                time.sleep(1.0)
+
+                # Take screenshot after clicking cross to check if screen changed
+                after_cross_screenshot = screenshot_handler.capture_screenshot("after_cross_click.png")
+
+                if before_cross_screenshot and after_cross_screenshot:
+                    if screenshot_handler.compare_screenshots(before_cross_screenshot, after_cross_screenshot):
+                        logging.warning("⚠️ ALERT: No screen content change detected after clicking cross button!")
+                        logging.warning("The cross button click may have failed or the UI did not respond as expected")
+                    else:
+                        logging.info("Screen content changed after cross click - navigation successful")
+
+                    # Clean up temporary screenshots
+                    try:
+                        if os.path.exists(before_cross_screenshot):
+                            os.remove(before_cross_screenshot)
+                        if os.path.exists(after_cross_screenshot):
+                            os.remove(after_cross_screenshot)
+                    except Exception as e:
+                        logging.debug(f"Could not clean up temporary screenshots: {e}")
+
                 # Wait for next profile to load
                 time.sleep(TIMEOUTS["profile_load"])
             else:

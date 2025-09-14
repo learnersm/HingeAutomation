@@ -40,54 +40,51 @@ class TestCrossButtonClick(unittest.TestCase):
         Test that cross button coordinates are calculated correctly
         Cross button should be in bottom left area of the screen
         """
-        # Expected cross button position (bottom left area)
-        # Current implementation uses: cross_x = width * 9 // 10, cross_y = height // 10
-        # But user mentioned it should be bottom left, so let's test both approaches
+        # Expected cross button position (manually verified coordinates)
+        # User provided coordinates from physical device: (180, 2600)
+        manual_cross_x = 180
+        manual_cross_y = 2600
 
-        # Current implementation (top right area - may be incorrect)
-        current_cross_x = self.test_bounds['width'] * 9 // 10  # 90% from left = 972
-        current_cross_y = self.test_bounds['height'] // 10     # 10% from top = 192
-
-        # Correct implementation for bottom left
-        correct_cross_x = self.test_bounds['width'] // 10      # 10% from left = 108
-        correct_cross_y = self.test_bounds['height'] * 9 // 10  # 90% from top = 1728
+        # Old dynamic implementation (top right area - was incorrect)
+        old_cross_x = self.test_bounds['width'] * 9 // 10  # 90% from left = 972
+        old_cross_y = self.test_bounds['height'] // 10     # 10% from top = 192
 
         print("\n📍 Cross Button Coordinate Analysis:")
         print(f"Screen dimensions: {self.test_bounds['width']}x{self.test_bounds['height']}")
-        print(f"Current implementation: ({current_cross_x}, {current_cross_y}) - Top Right Area")
-        print(f"Correct implementation: ({correct_cross_x}, {correct_cross_y}) - Bottom Left Area")
+        print(f"Old implementation: ({old_cross_x}, {old_cross_y}) - Top Right Area (WRONG)")
+        print(f"Manual coordinates: ({manual_cross_x}, {manual_cross_y}) - Bottom Left Area (CORRECT)")
 
-        # The current implementation is wrong - it's clicking top right instead of bottom left
-        self.assertNotEqual(current_cross_x, correct_cross_x,
-                          "Cross button X coordinate should be in left area, not right")
-        self.assertNotEqual(current_cross_y, correct_cross_y,
-                          "Cross button Y coordinate should be in bottom area, not top")
+        # The old implementation was wrong - it clicked top right instead of bottom left
+        self.assertNotEqual(old_cross_x, manual_cross_x,
+                          "Cross button X coordinate should be 180, not right side")
+        self.assertNotEqual(old_cross_y, manual_cross_y,
+                          "Cross button Y coordinate should be 2600, not top area")
 
     @patch('modules.interaction_handler.pyautogui')
-    def test_cross_button_click_with_correct_coordinates(self, mock_pyautogui):
+    def test_cross_button_click_with_manual_coordinates(self, mock_pyautogui):
         """
-        Test cross button click with corrected coordinates (bottom left)
+        Test cross button click with manually verified coordinates (180, 2600)
         """
         # Mock pyautogui to track click calls
         mock_pyautogui.click = Mock()
         mock_pyautogui.PAUSE = 1
 
-        # Calculate correct coordinates for bottom left
-        correct_cross_x = self.test_bounds['width'] // 10      # 10% from left
-        correct_cross_y = self.test_bounds['height'] * 9 // 10  # 90% from top
+        # Use manually verified coordinates from physical device
+        manual_cross_x = 180   # Fixed coordinate from device
+        manual_cross_y = 2600  # Fixed coordinate from device
 
         # Calculate expected screen coordinates (window bounds + relative coordinates)
-        expected_screen_x = self.test_bounds['left'] + correct_cross_x
-        expected_screen_y = self.test_bounds['top'] + correct_cross_y
+        expected_screen_x = self.test_bounds['left'] + manual_cross_x
+        expected_screen_y = self.test_bounds['top'] + manual_cross_y
 
-        # Perform the click with corrected coordinates
-        result = self.interaction_handler.click_at(correct_cross_x, correct_cross_y)
+        # Perform the click with manual coordinates
+        result = self.interaction_handler.click_at(manual_cross_x, manual_cross_y)
 
         # Verify the click was called with correct screen coordinates
         mock_pyautogui.click.assert_called_once_with(expected_screen_x, expected_screen_y)
 
-        print("\n✅ Cross Button Click Test:")
-        print(f"Relative coordinates: ({correct_cross_x}, {correct_cross_y})")
+        print("\n✅ Cross Button Click Test (Manual Coordinates):")
+        print(f"Manual coordinates: ({manual_cross_x}, {manual_cross_y})")
         print(f"Screen coordinates: ({expected_screen_x}, {expected_screen_y})")
         print(f"Click result: {result}")
 

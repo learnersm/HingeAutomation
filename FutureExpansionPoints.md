@@ -1,6 +1,6 @@
 FutureExpansionPoints
 
-------
+-----_run
 
 P0
 ------
@@ -8,11 +8,23 @@ Work end to end for an app. Hinge to start with
 - Also chat with people already in match list
 - Notify user when the user is ready for a date
 - Suggest places nearby - activities based on match's interest ( activities / dinner )
-
+- Remove duplicate screenshots before sending them to AI for analysis
+- Before each run, 
+    - Clear screenshots_from_last_run folder
+    - Move all images in screenshots folder to screenshots_from_last_run folder 
+    - Clear the screenshots folder
+- Short circuit[just like humans] : Analyse the first screenshot before proceeding to full analysis. If the image is anything that the client is not looking for, click on cross and move to next profile, this saves time that would have otherwise gone in a full profile analysis
+- Human based swiping actions 
+    - to prevent getting bot banned
+    - not a straight line
+    - add varying speed of scroll and varying delay between scrolls
 
 P1
 -------
-Identify the exact girl to which the profile belongs - sometimes, girls can have multiple people in their profile pictures - potentially skewing results
-
+- Identify the exact girl to which the profile belongs - sometimes, girls can have multiple people in their profile pictures - potentially skewing results
+- Clicking on a specific picture rather than the last one
+- Clicks Works for dynamic window placement, Right now it works for hardcoded values based on the assumption that the window will open at a certain specific place on my desktop. Snippets:
+    - Cross button: physical device screen coordinates: (X,Y) : (180,2600)
+    - [Physical device screen coordinates: (X,Y) : (1190,2300)- map this to relative coordinates based on the scrcpy window placement]
 -------
-Work with other apps
+Work with other apps like bumble etc

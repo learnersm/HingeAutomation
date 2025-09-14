@@ -5,10 +5,12 @@ Handles witty comment creation
 
 import logging
 from config import MAX_COMMENT_LENGTH
+from .ai import get_llm
 
 class CommentGenerator:
-    def __init__(self):
+    def __init__(self, llm=None):
         self.api_key = None  # For LLM API if used
+        self.llm = llm or get_llm()
 
     def generate_comment(self, profile_data):
         """

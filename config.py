@@ -42,3 +42,17 @@ SCRCPY_OPTIONS = [
     "--max-size=1080",
     "--video-bit-rate=8M"
 ]
+
+# AI settings
+AI_PROVIDER = "ollama"  # Default AI provider
+
+OLLAMA_CONFIG = {
+    "model": "gemma3:4b",
+    "host": None,  # Use default Ollama host if None
+    "options": {
+        "temperature": 0.7,
+        "num_predict": 256
+    },
+    "timeout_s": 30,
+    "max_retries": 2
+}

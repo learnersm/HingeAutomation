@@ -6,3 +6,4 @@ requests==2.31.0
 numpy==1.24.3
 pytesseract==0.3.10
 playsound==1.2.2
+ollama>=0.3.0

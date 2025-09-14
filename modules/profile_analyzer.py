@@ -5,10 +5,12 @@ Handles image/text analysis and rating logic
 
 import logging
 from config import RATING_THRESHOLD, MAX_RATING
+from .ai import get_llm
 
 class ProfileAnalyzer:
-    def __init__(self):
+    def __init__(self, llm=None):
         self.current_profile = None
+        self.llm = llm or get_llm()
 
     def analyze_profile(self, screenshots):
         """

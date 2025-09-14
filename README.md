@@ -33,11 +33,31 @@ Run the main script:
 python main.py
 ```
 
+## Testing
+
+### AI Layer Testing
+
+To test the AI layer functionality (requires Ollama to be running locally):
+
+```bash
+cd tests
+python3 test_ai_layer.py
+```
+
+This will test the Ollama integration with a simple prompt and verify that the AI layer is working correctly.
+
+### Requirements for AI Testing
+
+- Ollama installed and running locally
+- Model `gemma3:4b` pulled in Ollama (or update `OLLAMA_CONFIG` in `config.py`)
+- Python dependencies installed
+
 ## Project Structure
 
 - `main.py`: Main entry point
 - `config.py`: Configuration settings
 - `modules/`: Core functionality modules
+- `tests/`: Test scripts and utilities
 - `screenshots/`: Captured screenshots
 - `logs/`: Application logs
 
@@ -50,6 +70,11 @@ python main.py
 - `profile_analyzer.py`: Profile analysis and rating
 - `comment_generator.py`: Comment generation
 - `error_handler.py`: Error handling and cleanup
+- `ai/`: AI layer for LLM integration
+  - `llm_base.py`: LLM protocol definition
+  - `ollama_client.py`: Ollama LLM implementation
+  - `ai_manager.py`: LLM factory and configuration
+  - `prompts.py`: Prompt templates (for future use)
 
 ## Safety Notes
 

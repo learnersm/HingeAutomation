@@ -55,24 +55,6 @@ class TestUIDetector(unittest.TestCase):
         print(f"   Actual:   {heart_coords}")
         print("   Status:   ✓ PASS")
 
-    def test_button_coordinates_storage(self):
-        """
-        Test that button coordinates are stored correctly in the detector
-        """
-        # Test initial coordinates
-        self.assertEqual(self.ui_detector.button_coordinates['cross'], (810, 854))
-        self.assertEqual(self.ui_detector.button_coordinates['heart'], (1107, 779))
-
-        # Test coordinate updates
-        self.ui_detector.update_button_coordinates('cross', (100, 200))
-        self.assertEqual(self.ui_detector.button_coordinates['cross'], (100, 200))
-
-        print("✅ Button Coordinate Storage Test:")
-        print("   Initial cross coordinates: (810, 854)")
-        print("   Initial heart coordinates: (1107, 779)")
-        print("   Updated cross coordinates: (100, 200)")
-        print("   Status:   ✓ PASS")
-
     def test_find_button_coordinates_method(self):
         """
         Test the find_button_coordinates method
@@ -111,24 +93,6 @@ class TestUIDetector(unittest.TestCase):
         print("   Instance created: ✓")
         print("   Cross coordinates: ✓")
         print("   Heart coordinates: ✓")
-        print("   Status:   ✓ PASS")
-
-    def test_detect_buttons_from_screenshot_placeholder(self):
-        """
-        Test the placeholder detect_buttons_from_screenshot method
-        """
-        # This is currently a placeholder that returns hardcoded coordinates
-        result = self.ui_detector.detect_buttons_from_screenshot("dummy_path.png")
-
-        expected = {
-            'cross': (810, 854),
-            'heart': (1107, 779)
-        }
-
-        self.assertEqual(result, expected)
-
-        print("✅ Screenshot Detection Test:")
-        print("   Method returns expected coordinates: ✓")
         print("   Status:   ✓ PASS")
 
 if __name__ == "__main__":

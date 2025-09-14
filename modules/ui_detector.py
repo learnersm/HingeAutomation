@@ -71,60 +71,46 @@ class UIDetector:
             logging.warning("Using fallback coordinates for heart button")
             return (1107, 779)
 
-    def detect_buttons_from_screenshot(self, screenshot_path: str) -> Dict[str, Tuple[int, int]]:
+    def get_comment_box_coords(self, window_bounds: Dict[str, int]) -> Tuple[int, int]:
         """
-        Detect button locations from a screenshot using image processing
-        This is a placeholder for future implementation
+        Get coordinates of the comment text box
 
         Args:
-            screenshot_path: Path to the screenshot file
+            window_bounds: Window bounds dictionary with width/height
 
         Returns:
-            Dictionary of button names to coordinates
+            Tuple of (x, y) coordinates for comment text box
         """
-        # TODO: Implement actual button detection using:
-        # - Template matching
-        # - OCR for text-based buttons
-        # - Color/shape analysis
-        # - Machine learning models
+        coords = self.find_button_coordinates('comment_box')
+        if coords and coords != (0, 0):
+            return coords
+        else:
+            # Calculate coordinates: center horizontally, near bottom
+            center_x = window_bounds['width'] // 2
+            text_box_y = window_bounds['height'] * 4 // 5  # Near bottom
+            logging.info(f"Calculated comment box coordinates: ({center_x}, {text_box_y})")
+            return (center_x, text_box_y)
 
-        logging.info(f"Button detection from screenshot: {screenshot_path}")
-        logging.info("Using hardcoded coordinates (detection not yet implemented)")
-
-        # For now, return the hardcoded coordinates
-        return {
-            'cross': self.button_coordinates['cross'],
-            'heart': self.button_coordinates['heart']
-        }
-
-    def update_button_coordinates(self, button_name: str, coordinates: Tuple[int, int]):
+    def get_send_button_coords(self, window_bounds: Dict[str, int]) -> Tuple[int, int]:
         """
-        Update coordinates for a specific button
+        Get coordinates of the send button
 
         Args:
-            button_name: Name of the button
-            coordinates: New (x, y) coordinates
+            window_bounds: Window bounds dictionary with width/height
+
+        Returns:
+            Tuple of (x, y) coordinates for send button
         """
-        self.button_coordinates[button_name] = coordinates
-        logging.info(f"Updated {button_name} button coordinates to: {coordinates}")
+        coords = self.find_button_coordinates('send_button')
+        if coords and coords != (0, 0):
+            return coords
+        else:
+            # Calculate coordinates: right side, near bottom
+            send_x = window_bounds['width'] * 4 // 5  # Right side
+            send_y = window_bounds['height'] * 9 // 10  # Near bottom
+            logging.info(f"Calculated send button coordinates: ({send_x}, {send_y})")
+            return (send_x, send_y)
 
-    def calibrate_buttons(self, screenshot_path: str):
-        """
-        Calibrate button positions based on a reference screenshot
-        This is a placeholder for future implementation
-
-        Args:
-            screenshot_path: Path to reference screenshot
-        """
-        logging.info(f"Calibrating button positions using: {screenshot_path}")
-
-        # TODO: Implement calibration logic
-        # - Take reference screenshot
-        # - Detect button positions
-        # - Update stored coordinates
-        # - Handle different screen sizes/resolutions
-
-        logging.info("Button calibration completed (placeholder implementation)")
 
 # Global instance for easy access
 _ui_detector = None

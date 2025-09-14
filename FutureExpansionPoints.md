@@ -18,6 +18,8 @@ Work end to end for an app. Hinge to start with
     - to prevent getting bot banned
     - not a straight line
     - add varying speed of scroll and varying delay between scrolls
+- Implement error handling
+- Fix the lcoation for before and after location of screenshot so that , debugging is easier. And they are cleaned up only at the beginning of a new run, not during a run
 
 P1
 -------

@@ -7,7 +7,7 @@ import logging
 import time
 from typing import Dict, Any
 from config import MAX_COMMENT_LENGTH
-from ai.ai_manager import get_llm
+from modules.ai.ai_manager import get_llm
 
 class CommentGenerator:
     def __init__(self, llm=None, interaction_handler=None):
@@ -43,11 +43,6 @@ class CommentGenerator:
 
             logging.info(f"Posting comment: '{comment}'")
 
-            # Step 1: Click on the first photo to open comment interface
-            if not self._click_first_photo(handler):
-                logging.error("Failed to click first photo")
-                return False
-
             # Step 2: Click the heart/like icon to open comment box
             if not self._click_heart_icon(handler):
                 logging.error("Failed to click heart icon")
@@ -70,28 +65,7 @@ class CommentGenerator:
             logging.error(f"Failed to post comment: {e}")
             return False
 
-    def _click_first_photo(self, handler) -> bool:
-        """
-        Click on the first photo in the profile
-
-        Args:
-            handler: Interaction handler
-
-        Returns:
-            bool: True if clicked successfully
-        """
-        try:
-            # Assume first photo is in top portion of profile
-            # This may need adjustment based on actual Hinge UI
-            center_x = handler.window_bounds['width'] // 2
-            photo_y = handler.window_bounds['height'] // 3  # Top third for first photo
-
-            logging.info(f"Clicking first photo at ({center_x}, {photo_y})")
-            return handler.click_at(center_x, photo_y)
-
-        except Exception as e:
-            logging.error(f"Failed to click first photo: {e}")
-            return False
+    
 
     def _click_heart_icon(self, handler) -> bool:
         """
@@ -161,12 +135,15 @@ class CommentGenerator:
             bool: True if typed successfully
         """
         try:
-            # Click on the comment text box first
-            center_x = handler.window_bounds['width'] // 2
-            text_box_y = handler.window_bounds['height'] * 4 // 5  # Near bottom
+            # Get comment box coordinates from UI detector
+            from ui_detector import get_ui_detector
+            ui_detector = get_ui_detector()
 
-            logging.info(f"Clicking comment text box at ({center_x}, {text_box_y})")
-            handler.click_at(center_x, text_box_y)
+            # Get coordinates from UI detector
+            text_box_x, text_box_y = ui_detector.get_comment_box_coords(handler.window_bounds)
+
+            logging.info(f"Clicking comment text box at ({text_box_x}, {text_box_y})")
+            handler.click_at(text_box_x, text_box_y)
             time.sleep(0.5)
 
             # Type the comment
@@ -177,6 +154,7 @@ class CommentGenerator:
             logging.error(f"Failed to type comment: {e}")
             return False
 
+    # TODO : Later, wrong place for this method, 
     def _send_comment(self, handler) -> bool:
         """
         Send the comment by clicking send button
@@ -188,9 +166,12 @@ class CommentGenerator:
             bool: True if sent successfully
         """
         try:
-            # Send button is typically at bottom right
-            send_x = handler.window_bounds['width'] * 4 // 5  # Right side
-            send_y = handler.window_bounds['height'] * 9 // 10  # Near bottom
+            # Get send button coordinates from UI detector
+            from ui_detector import get_ui_detector
+            ui_detector = get_ui_detector()
+
+            # Get coordinates from UI detector
+            send_x, send_y = ui_detector.get_send_button_coords(handler.window_bounds)
 
             logging.info(f"Clicking send button at ({send_x}, {send_y})")
             time.sleep(0.5)

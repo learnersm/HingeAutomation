@@ -13,15 +13,15 @@ Steps
 - Now rate the girl on a scale of 1 to 10.
 8. Perform action on the profile, use the LLM layer to find the required buttons to click
 - In case the rating is < 7 , move to the next profile. i.e. click on cross [absolute cordinates (X,Y):(810,854)]. Repeat steps for the next profile
-- In case the rating is >= 7, then click on like/heart button that you see
-    - [In case we clicked like] Then analyse all the text in the profile and the images in the profile and create an understanding about the girl
+- In case the rating is >= 7, 
+    - Then analyse all the text in the profile and the images in the profile and create an understanding about the girl
     - Now create a witty comment (under 150 characters) to spark her interest based on your understanding of the girl
-    - Click the heart icon on the last picture in the profile [absolute cordinates (X,Y):(1107,779)]
+    - Click the heart icon at the specified coordinates: [absolute cordinates (X,Y):(1107,779)] (Context : This is the heart icon on last picture in the profile)
     - After clicking on the heart icon, you will see a box saying add a comment
     - Click on the box
-    - Paste your crafted comment in this box. 
+    - Paste your comment in this box. 
     - after writing your comment in the box, Minimise the open keyboard dialog box
-    - Click on "send like"
+    - Click on "Send like"
     - This will now show the next profile on the screen
 - Repeat
 

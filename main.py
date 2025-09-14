@@ -16,10 +16,93 @@ from window_detector import WindowDetector
 from interaction_handler import InteractionHandler
 from screenshot_handler import ScreenshotHandler
 from profile_analyzer import ProfileAnalyzer
-from comment_generator import CommentGenerator
+
 from error_handler import ErrorHandler
 from ui_detector import get_ui_detector
 from config import TIMEOUTS
+
+def like_and_post_comment(comment: str, interaction_handler, ui_detector, screenshot_handler) -> bool:
+    """
+    Like the profile and 
+    Post a comment directly using interaction handler and UI detector
+
+    Args:
+        comment: The comment text to post
+        interaction_handler: Handler for UI interactions
+        ui_detector: UI detector for coordinates
+        screenshot_handler: Handler for screenshots
+
+    Returns:
+        bool: True if comment posted successfully, False otherwise
+    """
+    if not comment or comment == 'N/A':
+        logging.warning("No valid comment to post")
+        return False
+
+    try:
+        # Step 1: Click the heart/like icon to open comment box
+        heart_x, heart_y = ui_detector.get_heart_button_coords()
+        logging.info(f"Clicking heart icon at ({heart_x}, {heart_y})")
+
+        # Take screenshot before clicking heart for comparison
+        before_heart_screenshot = screenshot_handler.capture_screenshot("before_heart_click.png")
+
+        if not interaction_handler.click_at(heart_x, heart_y):
+            logging.error("Failed to click heart icon")
+            return False
+
+        # Wait for UI to respond
+        time.sleep(1.0)
+
+        # Take screenshot after clicking heart to check if screen changed
+        after_heart_screenshot = screenshot_handler.capture_screenshot("after_heart_click.png")
+
+        if before_heart_screenshot and after_heart_screenshot:
+            if screenshot_handler.compare_screenshots(before_heart_screenshot, after_heart_screenshot):
+                logging.warning("⚠️ ALERT: No screen content change detected after clicking heart/like icon!")
+                logging.warning("The heart icon click may have failed or the comment interface did not open")
+            else:
+                logging.info("Screen content changed after heart click - comment interface opened successfully")
+
+            # Clean up temporary screenshots
+            try:
+                import os
+                if os.path.exists(before_heart_screenshot):
+                    os.remove(before_heart_screenshot)
+                if os.path.exists(after_heart_screenshot):
+                    os.remove(after_heart_screenshot)
+            except Exception as e:
+                logging.debug(f"Could not clean up temporary screenshots: {e}")
+
+        # Step 3: Type the comment
+        text_box_x, text_box_y = ui_detector.get_comment_box_coords(interaction_handler.window_bounds)
+        logging.info(f"Clicking comment text box at ({text_box_x}, {text_box_y})")
+        interaction_handler.click_at(text_box_x, text_box_y)
+        time.sleep(0.5)
+
+        logging.info(f"Typing comment: {comment}")
+        if not interaction_handler.type_text(comment):
+            logging.error("Failed to type comment")
+            return False
+
+        # Step 4: Send the comment
+        send_x, send_y = ui_detector.get_send_button_coords(interaction_handler.window_bounds)
+        logging.info(f"Posting comment: '{comment}'")
+        logging.info(f"Clicking send button at ({send_x}, {send_y})")
+        time.sleep(0.5)
+
+        if not interaction_handler.click_at(send_x, send_y):
+            logging.error("Failed to send comment")
+            return False
+
+        # Wait for comment to post
+        time.sleep(1.0)
+        logging.info("Comment sent successfully")
+        return True
+
+    except Exception as e:
+        logging.error(f"Failed to post comment: {e}")
+        return False
 
 def cleanup_screenshots():
     """
@@ -85,7 +168,7 @@ def main():
     interaction_handler = InteractionHandler()
     screenshot_handler = ScreenshotHandler()
     profile_analyzer = ProfileAnalyzer()
-    comment_generator = CommentGenerator()
+
     error_handler = ErrorHandler()
     ui_detector = get_ui_detector()
 
@@ -159,6 +242,36 @@ def main():
         else:
             logging.error("Failed to capture first screenshot")
             return
+
+        # Quick analysis for pre-filtering
+        print("\n" + "="*60)
+        print("QUICK PROFILE ANALYSIS")
+        print("="*60)
+        logging.info("Performing quick analysis for profile filtering...")
+
+        quick_result = profile_analyzer.quick_analyze_profile([first_screenshot])
+        logging.info(f"Quick analysis result: Rating {quick_result['rating']}/10")
+        logging.info(f"Red flags detected: {quick_result['has_red_flags']}")
+
+        # Check if we should continue with full analysis
+        if not profile_analyzer.should_continue_full_analysis(quick_result):
+            logging.info("Profile filtered out by quick analysis - skipping to next profile")
+
+            # Skip to next profile by clicking cross
+            cross_x, cross_y = ui_detector.get_cross_button_coords()
+            logging.info(f"Using cross button coordinates: ({cross_x}, {cross_y})")
+
+            if interaction_handler.click_at(cross_x, cross_y):
+                logging.info("Cross clicked - moving to next profile")
+                # Wait for next profile to load
+                time.sleep(TIMEOUTS["profile_load"])
+            else:
+                logging.error("Failed to click cross button")
+
+            logging.info("Profile processing complete - quick filtered")
+            return  # Exit early, don't continue with full analysis
+
+        logging.info("Profile passed quick analysis - continuing with full screenshot capture")
 
         # Scroll and take more screenshots
         max_scrolls = 10  # Prevent infinite loop
@@ -253,11 +366,13 @@ def main():
 
         # Make decision based on analysis
         if profile_analyzer.should_engage_profile(analysis_result):
-            # Post the generated comment
+            # Post the generated comment directly
             logging.info("Engaging with profile - posting comment")
-            comment_success = comment_generator.post_comment(
+            comment_success = like_and_post_comment(
                 analysis_result['comment'],
-                interaction_handler
+                interaction_handler,
+                ui_detector,
+                screenshot_handler
             )
 
             if comment_success:
@@ -271,6 +386,7 @@ def main():
             # Skip to next profile by clicking cross
             logging.info("Skipping profile - clicking cross")
 
+            # TODO : Later : Refactor this code to a function
             # Take screenshot before clicking cross for comparison
             before_cross_screenshot = screenshot_handler.capture_screenshot("before_cross_click.png")
 

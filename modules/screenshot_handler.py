@@ -122,7 +122,7 @@ class ScreenshotHandler:
                     return None
             else:
                 # Capture full screen
-                logging.info("Capturing full screen screenshot")
+                logging.warning("Capturing full screen screenshot")
                 if PIL_AVAILABLE:
                     screenshot = ImageGrab.grab()
                     screenshot.save(filepath)
@@ -158,23 +158,6 @@ class ScreenshotHandler:
         except Exception as e:
             logging.error(f"Error saving screenshot: {e}")
             return False
-
-    def get_latest_screenshot(self):
-        """
-        Get the most recent screenshot
-        """
-        try:
-            files = [f for f in os.listdir(self.screenshot_dir) if f.endswith(f".{SCREENSHOT_FORMAT}")]
-            if not files:
-                return None
-
-            files.sort(key=lambda x: os.path.getmtime(os.path.join(self.screenshot_dir, x)), reverse=True)
-            latest_file = os.path.join(self.screenshot_dir, files[0])
-            logging.info(f"Latest screenshot: {latest_file}")
-            return latest_file
-        except Exception as e:
-            logging.error(f"Error getting latest screenshot: {e}")
-            return None
 
     def compare_screenshots(self, screenshot1_path, screenshot2_path):
         """

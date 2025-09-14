@@ -5,6 +5,7 @@ ENV/
 
 # Screenshots and Logs
 screenshots/
+screenshots_from_last_run/
 logs/
 
 # Python

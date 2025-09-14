@@ -20,6 +20,50 @@ from comment_generator import CommentGenerator
 from error_handler import ErrorHandler
 from config import TIMEOUTS
 
+def cleanup_screenshots():
+    """
+    Clean up screenshot directories before each run
+    - Clear screenshots_from_last_run folder
+    - Move all images from screenshots folder to screenshots_from_last_run
+    - Clear the screenshots folder
+    """
+    import shutil
+
+    screenshots_dir = "screenshots"
+    last_run_dir = "screenshots_from_last_run"
+
+    try:
+        # Create directories if they don't exist
+        os.makedirs(screenshots_dir, exist_ok=True)
+        os.makedirs(last_run_dir, exist_ok=True)
+
+        # Clear screenshots_from_last_run folder
+        for filename in os.listdir(last_run_dir):
+            file_path = os.path.join(last_run_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                logging.info(f"Removed old file from last run: {filename}")
+
+        # Move all files from screenshots to screenshots_from_last_run
+        for filename in os.listdir(screenshots_dir):
+            src_path = os.path.join(screenshots_dir, filename)
+            dst_path = os.path.join(last_run_dir, filename)
+            if os.path.isfile(src_path):
+                shutil.move(src_path, dst_path)
+                logging.info(f"Moved screenshot to last run: {filename}")
+
+        # Clear the screenshots folder (should be empty now, but just in case)
+        for filename in os.listdir(screenshots_dir):
+            file_path = os.path.join(screenshots_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                logging.info(f"Cleaned up remaining file: {filename}")
+
+        logging.info("Screenshot cleanup completed successfully")
+
+    except Exception as e:
+        logging.error(f"Error during screenshot cleanup: {e}")
+
 def main():
     """
     Main automation workflow
@@ -29,6 +73,10 @@ def main():
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s'
     )
+
+    # Clean up screenshots from previous run
+    logging.info("Performing screenshot cleanup from previous run...")
+    cleanup_screenshots()
 
     # Initialize components
     scrcpy_mgr = ScrcpyManager()

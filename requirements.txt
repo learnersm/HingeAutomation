@@ -1,5 +1,5 @@
 pyautogui==0.9.54
-opencv-python==4.8.1.78
+opencv-python==4.10.0.84
 Pillow==10.0.1
 pygetwindow==0.0.9
 requests==2.31.0

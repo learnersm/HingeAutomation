@@ -7,8 +7,8 @@ import logging
 import time
 import os
 import ollama
-from typing import Optional, Dict
-from .llm_base import LLM
+from typing import Optional, Dict, List
+from ai.llm_base import LLM
 
 class OllamaLLM(LLM):
     """
@@ -33,7 +33,7 @@ class OllamaLLM(LLM):
         self.timeout_s = timeout_s
         self.max_retries = max_retries
 
-    def generate(self, prompt: str, system: Optional[str] = None, options: Optional[Dict] = None) -> str:
+    def generate(self, prompt: str, system: Optional[str] = None, options: Optional[Dict] = None, images: Optional[List[str]] = None) -> str:
         """
         Generate text using Ollama
 
@@ -41,6 +41,7 @@ class OllamaLLM(LLM):
             prompt: The main prompt text
             system: Optional system message
             options: Optional generation parameters
+            images: Optional list of image file paths for vision analysis
 
         Returns:
             Generated text response
@@ -59,6 +60,19 @@ class OllamaLLM(LLM):
 
                 if system:
                     kwargs["system"] = system
+
+                if images:
+                    # Convert image paths to file objects for Ollama
+                    image_files = []
+                    for img_path in images:
+                        try:
+                            with open(img_path, 'rb') as f:
+                                image_files.append(f.read())
+                        except Exception as e:
+                            logging.warning(f"Failed to read image {img_path}: {e}")
+                            continue
+                    if image_files:
+                        kwargs["images"] = image_files
 
                 if self.host:
                     # Temporarily set OLLAMA_HOST environment variable

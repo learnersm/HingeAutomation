@@ -176,6 +176,67 @@ class ScreenshotHandler:
             logging.error(f"Error getting latest screenshot: {e}")
             return None
 
+    def compare_screenshots(self, screenshot1_path, screenshot2_path):
+        """
+        Compare two screenshots to check if they are identical or very similar
+        Uses efficient hash-based comparison to detect end of profile
+        Returns True if identical, False otherwise
+        """
+        if not PIL_AVAILABLE:
+            logging.error("PIL not available. Cannot compare screenshots.")
+            return False
+
+        try:
+            img1 = Image.open(screenshot1_path)
+            img2 = Image.open(screenshot2_path)
+
+            # Check if images are identical in size
+            if img1.size != img2.size:
+                return False
+
+            # Use perceptual hash for efficient comparison
+            # This is much faster than pixel-by-pixel comparison
+            try:
+                import imagehash
+                hash1 = imagehash.phash(img1)
+                hash2 = imagehash.phash(img2)
+
+                # Calculate hamming distance between hashes
+                hash_diff = hash1 - hash2
+
+                # If hash difference is very small (less than 5), consider identical
+                # This indicates we've reached the end of scrollable content
+                is_identical = hash_diff < 5
+
+                logging.info(f"Screenshot comparison: hash difference {hash_diff}, identical: {is_identical}")
+                return is_identical
+
+            except ImportError:
+                # Fallback to simple pixel sampling if imagehash not available
+                logging.warning("imagehash not available, using pixel sampling comparison")
+
+                # Sample pixels at regular intervals for efficiency
+                sample_step = 50  # Check every 50th pixel
+                diff_pixels = 0
+                total_samples = 0
+
+                for x in range(0, img1.width, sample_step):
+                    for y in range(0, img1.height, sample_step):
+                        total_samples += 1
+                        if img1.getpixel((x, y)) != img2.getpixel((x, y)):
+                            diff_pixels += 1
+
+                # If less than 2% of sampled pixels differ, consider identical
+                diff_percentage = diff_pixels / total_samples if total_samples > 0 else 0
+                is_identical = diff_percentage < 0.02
+
+                logging.info(f"Screenshot comparison (sampling): {diff_percentage:.2%} difference, identical: {is_identical}")
+                return is_identical
+
+        except Exception as e:
+            logging.error(f"Error comparing screenshots: {e}")
+            return False
+
     def cleanup_old_screenshots(self, keep_recent=10):
         """
         Remove old screenshot files, keeping the most recent ones
@@ -195,40 +256,3 @@ class ScreenshotHandler:
 
         except Exception as e:
             logging.error(f"Error cleaning up screenshots: {e}")
-
-    def compare_screenshots(self, screenshot1_path, screenshot2_path):
-        """
-        Compare two screenshots to check if they are identical
-        Returns True if identical, False otherwise
-        """
-        if not PIL_AVAILABLE:
-            logging.error("PIL not available. Cannot compare screenshots.")
-            return False
-
-        try:
-            img1 = Image.open(screenshot1_path)
-            img2 = Image.open(screenshot2_path)
-
-            # Check if images are identical
-            if img1.size != img2.size:
-                return False
-
-            # Compare pixel by pixel
-            diff = Image.new("RGB", img1.size)
-            diff_pixels = []
-            for x in range(img1.width):
-                for y in range(img1.height):
-                    if img1.getpixel((x, y)) != img2.getpixel((x, y)):
-                        diff_pixels.append((x, y))
-
-            # If less than 1% of pixels differ, consider identical
-            total_pixels = img1.width * img1.height
-            diff_percentage = len(diff_pixels) / total_pixels
-            is_identical = diff_percentage < 0.01
-
-            logging.info(f"Screenshot comparison: {diff_percentage:.2%} difference, identical: {is_identical}")
-            return is_identical
-
-        except Exception as e:
-            logging.error(f"Error comparing screenshots: {e}")
-            return False

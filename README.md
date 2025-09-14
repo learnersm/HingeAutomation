@@ -46,11 +46,27 @@ python3 test_ai_layer.py
 
 This will test the Ollama integration with a simple prompt and verify that the AI layer is working correctly.
 
-### Requirements for AI Testing
+### Step 7 Profile Analysis Testing
+
+To test the complete Step 7 profile analysis and engagement functionality:
+
+```bash
+cd tests
+python3 test_step7.py
+```
+
+This will test:
+- Profile analysis using vision LLM
+- Rating and decision logic
+- Comment generation and validation
+- Integration between ProfileAnalyzer and CommentGenerator
+
+### Requirements for Testing
 
 - Ollama installed and running locally
 - Model `gemma3:4b` pulled in Ollama (or update `OLLAMA_CONFIG` in `config.py`)
 - Python dependencies installed
+- Screenshots in `screenshots/` directory (for full testing) or run with mock data
 
 ## Project Structure
 

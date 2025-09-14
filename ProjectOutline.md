@@ -8,17 +8,19 @@ Steps
 - Take the first screenshot
 - Now scroll sufficiently so that what you see on screen is new content , that is non overlapping with the previous screenshot
 - Take the next screenshot, continue doing this until you reach the end of the profile and cannot scroll any further
-7. Now use the screenshots that represent her profile as an input and answer these questions
-- Identify the girl who's profile it is. Many a times girls can have group pictures making it hard to identify the actual girl. given you have all the screenshots of the profile, you should be able to pinpoint the girl
+7. Now use the screenshots that represent her profile as an input and rate the girl
+- Note that we need to Identify the girl who's profile picture it is. Many a times girls can have group pictures making it hard to identify the actual girl. Given you have all the screenshots of the profile, you should be able to pinpoint the girl. For this step, just provide the screenshots to the LLM layer and ask it the required questions.
 - Now rate the girl on a scale of 1 to 10.
-- In case the rating is < 7 , move to the next profile. i.e. click on cross. 
-- In case the rating is >= 7, then analyse all the text in the profile and the images in the profile and create an understanding about the girl
-- Now create a witty comment (under 150 characters) to spark her interest based on your understanding of the girl, and reply to the first photo in the profile
-    - For this click on the heart like icon on the picture and you will see a box saying add a comment
+8. Perform action on the profile, use the LLM layer to find the required buttons to click
+- In case the rating is < 7 , move to the next profile. i.e. click on cross. Repeat steps for the next profile
+- In case the rating is >= 7, then click on like/heart button that you see
+    - [In case we clicked like] Then analyse all the text in the profile and the images in the profile and create an understanding about the girl
+    - Now create a witty comment (under 150 characters) to spark her interest based on your understanding of the girl, and reply to the first photo in the profile
+    - After clicking on the heart icon, you will see a box saying add a comment
     - Click on the box
     - Paste your crafted comment in this box. 
-    - minimise the keyboard
-    - click on send like.
+    - after writing your comment in the box, Minimise the open keyboard dialog box
+    - Click on "send like"
     - This will now show the next profile on the screen
 - Repeat
 

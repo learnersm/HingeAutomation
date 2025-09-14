@@ -10,5 +10,9 @@ Work end to end for an app. Hinge to start with
 - Suggest places nearby - activities based on match's interest ( activities / dinner )
 
 
+P1
+-------
+Identify the exact girl to which the profile belongs - sometimes, girls can have multiple people in their profile pictures - potentially skewing results
+
 -------
 Work with other apps

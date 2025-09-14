@@ -37,10 +37,15 @@ MAX_RETRY_ATTEMPTS = 3
 DAILY_LIMIT_MESSAGE = "Limit of daily profiles reached"
 
 # Scrcpy settings
+# Note: When multiple ADB devices are connected, use one of these options:
+# --select-usb : Select USB device (recommended)
+# --select-tcpip : Select TCP/IP device
+# -s <serial> : Select specific device by serial number
 SCRCPY_OPTIONS = [
     "--window-title=HingeAutomation",
     "--max-size=1080",
-    "--video-bit-rate=8M"
+    "--video-bit-rate=8M",
+    "--select-usb"  # Select USB device when multiple devices are connected
 ]
 
 # AI settings

@@ -4,7 +4,7 @@ Factory for creating configured LLM instances
 """
 
 from typing import Optional
-from .ollama_client import OllamaLLM
+from ai.ollama_client import OllamaLLM
 
 # Cache for LLM instance
 _cached_llm = None

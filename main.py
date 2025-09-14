@@ -113,15 +113,16 @@ def main():
         # Scroll and take more screenshots
         max_scrolls = 10  # Prevent infinite loop
         scroll_count = 0
-        previous_screenshot = first_screenshot
+        consecutive_identical = 0  # Track consecutive identical screenshots
+        max_identical_threshold = 2  # Stop after 2 identical screenshots
 
         while scroll_count < max_scrolls:
-            # Perform scroll (swipe up to scroll down)
-            start_y = dimensions['height'] * 3 // 4
-            end_y = dimensions['height'] // 4
+            # Perform full swipe (almost end to end screen)
+            start_y = dimensions['height'] * 9 // 10  # Near bottom
+            end_y = dimensions['height'] // 10       # Near top
             center_x = dimensions['width'] // 2
 
-            logging.info(f"Performing scroll {scroll_count + 1}")
+            logging.info(f"Performing full scroll {scroll_count + 1}")
             if not interaction_handler.swipe(center_x, start_y, center_x, end_y):
                 logging.error("Failed to perform scroll")
                 break
@@ -137,15 +138,31 @@ def main():
                 logging.error("Failed to capture screenshot after scroll")
                 break
 
-            # Check if screenshot is different (new content)
-            if screenshot_handler.compare_screenshots(previous_screenshot, new_screenshot):
-                logging.info("Screenshots are identical, reached end of profile")
-                # Remove the identical screenshot
-                os.remove(new_screenshot)
-                break
+            # Check if screenshot is different from the last one (end of profile detection)
+            if len(profile_screenshots) > 0:
+                last_screenshot = profile_screenshots[-1]
+                if screenshot_handler.compare_screenshots(last_screenshot, new_screenshot):
+                    consecutive_identical += 1
+                    logging.info(f"Screenshots are identical (count: {consecutive_identical}/{max_identical_threshold})")
+
+                    # If we've seen identical screenshots multiple times, we've reached the end
+                    if consecutive_identical >= max_identical_threshold:
+                        logging.info("Reached end of profile - stopping scroll")
+                        # Remove the identical screenshot
+                        os.remove(new_screenshot)
+                        break
+                    else:
+                        # Keep the screenshot but continue (might be temporary UI state)
+                        profile_screenshots.append(new_screenshot)
+                        logging.info(f"Screenshot captured (may be duplicate): {new_screenshot}")
+                else:
+                    # Reset counter when we get different content
+                    consecutive_identical = 0
+                    profile_screenshots.append(new_screenshot)
+                    logging.info(f"New screenshot captured: {new_screenshot}")
             else:
+                # First scroll screenshot
                 profile_screenshots.append(new_screenshot)
-                previous_screenshot = new_screenshot
                 logging.info(f"New screenshot captured: {new_screenshot}")
 
             scroll_count += 1
@@ -154,8 +171,51 @@ def main():
         for screenshot in profile_screenshots:
             logging.info(f"Profile screenshot: {screenshot}")
 
-        # Placeholder for remaining steps
-        # TODO: Implement steps 7 from project outline
+        # Step 7: Analyze profile and decide action
+        print("\n" + "="*60)
+        print("STEP 7: PROFILE ANALYSIS & ENGAGEMENT")
+        print("="*60)
+
+        # Analyze the profile using vision LLM
+        logging.info("Analyzing profile with AI...")
+        analysis_result = profile_analyzer.analyze_profile(profile_screenshots)
+
+        logging.info(f"Analysis result: Rating {analysis_result['rating']}/10, Decision: {analysis_result['decision']}")
+        logging.info(f"Reason: {analysis_result['reason']}")
+
+        # Make decision based on analysis
+        if profile_analyzer.should_engage_profile(analysis_result):
+            # Post the generated comment
+            logging.info("Engaging with profile - posting comment")
+            comment_success = comment_generator.post_comment(
+                analysis_result['comment'],
+                interaction_handler
+            )
+
+            if comment_success:
+                logging.info("Comment posted successfully - waiting for next profile")
+                # Wait for next profile to load
+                time.sleep(TIMEOUTS["profile_load"])
+            else:
+                logging.error("Failed to post comment")
+                # Could implement retry logic here
+        else:
+            # Skip to next profile by clicking cross
+            logging.info("Skipping profile - clicking cross")
+            # Assume cross button is at top right of profile
+            cross_x = dimensions['width'] * 9 // 10  # Right side
+            cross_y = dimensions['height'] // 10     # Top area
+
+            if interaction_handler.click_at(cross_x, cross_y):
+                logging.info("Cross clicked - moving to next profile")
+                # Wait for next profile to load
+                time.sleep(TIMEOUTS["profile_load"])
+            else:
+                logging.error("Failed to click cross button")
+
+        # Continue the loop for next profile
+        # In a real implementation, this would be in a loop
+        logging.info("Profile processing complete - ready for next profile")
 
     except Exception as e:
         logging.error(f"Main workflow error: {e}")

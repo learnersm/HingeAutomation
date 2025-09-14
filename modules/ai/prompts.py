@@ -1,30 +1,38 @@
 """
 Prompt Templates
-Placeholder for future Step 7 prompt builders
+Step 7: Profile Analysis and Engagement
 """
 
-# TODO: Add prompt templates for:
-# - Person identification from profile screenshots
-# - Profile rating (1-10 scale)
-# - Comment generation based on profile analysis
+STEP7_ANALYSIS_PROMPT = """
+You are analyzing a Hinge dating profile from multiple screenshots. Your task is to:
 
-def build_identification_prompt(screenshots_data):
-    """
-    Build prompt for identifying the main person in profile
-    """
-    # Placeholder - to be implemented in Step 7
-    pass
+1. IDENTIFY the main person in the profile (especially important for group photos - look for consistency across images, self-descriptions, and context clues)
 
-def build_rating_prompt(profile_text, image_descriptions):
-    """
-    Build prompt for rating the profile
-    """
-    # Placeholder - to be implemented in Step 7
-    pass
+2. RATE the person on a scale of 1-10 based on:
+   - Physical attractiveness
+   - Personality indicators from text/photos
+   - Overall appeal and compatibility potential
+   - Presentation and effort in profile
 
-def build_comment_prompt(profile_analysis):
+3. DECISION: If rating >= 7, create a witty, personalized comment under 150 characters. If rating < 7, recommend skipping to next profile.
+
+4. COMMENT: If engaging, make it charming, specific to their profile, and conversation-starting.
+
+Analyze ALL provided screenshots carefully. Consider both visual and textual content.
+
+Respond in this EXACT format:
+
+RATING: X/10
+REASON: Brief explanation of rating
+DECISION: ENGAGE/NEXT_PROFILE
+COMMENT: [witty comment under 150 chars, or "N/A" if NEXT_PROFILE]
+"""
+
+def get_step7_analysis_prompt():
     """
-    Build prompt for generating witty comment
+    Get the comprehensive Step 7 analysis prompt
+
+    Returns:
+        str: The analysis prompt
     """
-    # Placeholder - to be implemented in Step 7
-    pass
+    return STEP7_ANALYSIS_PROMPT

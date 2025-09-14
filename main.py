@@ -171,6 +171,24 @@ def main():
         for screenshot in profile_screenshots:
             logging.info(f"Profile screenshot: {screenshot}")
 
+        # Remove the last screenshot if it's a duplicate (end of profile detection)
+        if len(profile_screenshots) > 1:
+            last_screenshot = profile_screenshots[-1]
+            second_last_screenshot = profile_screenshots[-2]
+
+            if screenshot_handler.compare_screenshots(second_last_screenshot, last_screenshot):
+                logging.info("Removing duplicate last screenshot before AI analysis")
+                # Remove the duplicate screenshot from the list
+                removed_screenshot = profile_screenshots.pop()
+                # Also remove the file from disk
+                if os.path.exists(removed_screenshot):
+                    os.remove(removed_screenshot)
+                    logging.info(f"Removed duplicate screenshot file: {removed_screenshot}")
+
+        logging.info(f"Final screenshots for AI analysis: {len(profile_screenshots)}")
+        for screenshot in profile_screenshots:
+            logging.info(f"Analysis screenshot: {screenshot}")
+
         # Step 7: Analyze profile and decide action
         print("\n" + "="*60)
         print("STEP 7: PROFILE ANALYSIS & ENGAGEMENT")

@@ -66,6 +66,55 @@ class ProfileAnalyzer:
                 'reason': f'Analysis failed: {str(e)}'
             }
 
+    def _extract_json_with_ai_retry(self, response: str, max_retries: int = 2) -> Dict[str, Any]:
+        """
+        Extract JSON from malformed response using AI retry
+
+        Args:
+            response: Raw LLM response that failed JSON parsing
+            max_retries: Maximum number of retry attempts
+
+        Returns:
+            Parsed JSON data or empty dict if all retries fail
+        """
+        for attempt in range(max_retries):
+            try:
+                logging.info(f"Attempting AI retry {attempt + 1}/{max_retries} to extract JSON")
+
+                retry_prompt = f"""Extract and return ONLY valid JSON from the following text. Remove any markdown formatting, code blocks, or extra text. Return JUST the JSON object:
+
+{response}
+
+Return ONLY the JSON object, no explanations or additional text."""
+
+                retry_response = self.llm.generate(
+                    prompt=retry_prompt,
+                    options={"temperature": 0.1, "num_predict": 200}
+                )
+
+                # Manually Clean the response - remove markdown code blocks if present
+                cleaned_response = retry_response.strip()
+                if cleaned_response.startswith('```json'):
+                    cleaned_response = cleaned_response[7:]
+                if cleaned_response.startswith('```'):
+                    cleaned_response = cleaned_response[3:]
+                if cleaned_response.endswith('```'):
+                    cleaned_response = cleaned_response[:-3]
+                cleaned_response = cleaned_response.strip()
+
+                logging.info(f"AI retry response: {cleaned_response}")
+
+                # Try to parse the cleaned response
+                return json.loads(cleaned_response)
+
+            except (json.JSONDecodeError, Exception) as e:
+                logging.warning(f"AI retry attempt {attempt + 1} failed: {e}")
+                if attempt == max_retries - 1:
+                    logging.error(f"All {max_retries} AI retry attempts failed")
+                    return {}
+
+        return {}
+
     def _parse_analysis_response(self, response: str) -> Dict[str, Any]:
         """
         Parse the LLM JSON response into structured data
@@ -86,8 +135,7 @@ class ProfileAnalyzer:
         try:
             # Try to parse as JSON
             parsed_data = json.loads(response.strip())
-            logging.info(f"Logging parsed data: {parsed_data}")
-
+            logging.info(f"Successfully parsed JSON data: {parsed_data}")
 
             # Extract fields from JSON
             if 'rating' in parsed_data:
@@ -119,7 +167,43 @@ class ProfileAnalyzer:
         except json.JSONDecodeError as e:
             logging.error(f"Failed to parse JSON response: {e}")
             logging.error(f"Raw response: {response}")
-            result['reason'] = f'JSON parse error: {str(e)}'
+
+            # Try AI retry to extract JSON
+            retry_data = self._extract_json_with_ai_retry(response)
+            if retry_data:
+                logging.info("Successfully extracted JSON using AI retry")
+                parsed_data = retry_data
+
+                # Extract fields from retry data
+                if 'rating' in parsed_data:
+                    rating = parsed_data['rating']
+                    if isinstance(rating, int) and 1 <= rating <= 10:
+                        result['rating'] = rating
+                    else:
+                        logging.warning(f"Invalid rating value from retry: {rating}, using default of 5")
+                        result['reason'] = f'Invalid rating value: {rating}, defaulting to 5'
+
+                if 'decision' in parsed_data:
+                    decision = parsed_data['decision'].upper()
+                    if decision in ['ENGAGE', 'NEXT_PROFILE']:
+                        result['decision'] = decision
+                    else:
+                        logging.warning(f"Invalid decision value from retry: {decision}")
+
+                if 'comment' in parsed_data:
+                    comment = parsed_data['comment']
+                    if comment and comment != 'N/A':
+                        # Ensure comment is under 150 characters
+                        if len(comment) > 150:
+                            comment = comment[:147] + '...'
+                        result['comment'] = comment
+
+                if 'reason' in parsed_data:
+                    result['reason'] = str(parsed_data['reason'])
+
+                result['reason'] = 'Successfully parsed using AI retry'
+            else:
+                result['reason'] = f'JSON parse error after AI retry: {str(e)}'
         except Exception as e:
             logging.error(f"Unexpected error parsing analysis response: {e}")
             result['reason'] = f'Parse error: {str(e)}'
@@ -207,6 +291,7 @@ class ProfileAnalyzer:
         try:
             # Try to parse as JSON
             parsed_data = json.loads(response.strip())
+            logging.info(f"Successfully parsed quick analysis JSON data: {parsed_data}")
 
             # Extract fields from JSON
             if 'rating' in parsed_data:
@@ -223,7 +308,28 @@ class ProfileAnalyzer:
         except json.JSONDecodeError as e:
             logging.error(f"Failed to parse JSON quick response: {e}")
             logging.error(f"Raw quick response: {response}")
-            result['reason'] = f'JSON parse error: {str(e)}'
+
+            # Try AI retry to extract JSON
+            retry_data = self._extract_json_with_ai_retry(response)
+            if retry_data:
+                logging.info("Successfully extracted JSON using AI retry for quick analysis")
+                parsed_data = retry_data
+
+                # Extract fields from retry data
+                if 'rating' in parsed_data:
+                    rating = parsed_data['rating']
+                    if isinstance(rating, int) and 1 <= rating <= 10:
+                        result['rating'] = rating
+                    else:
+                        logging.warning(f"Invalid quick rating value from retry: {rating}, using default of 5")
+                        result['reason'] = f'Invalid rating value: {rating}, defaulting to 5'
+
+                if 'reason' in parsed_data:
+                    result['reason'] = str(parsed_data['reason'])
+
+                result['reason'] = 'Successfully parsed using AI retry'
+            else:
+                result['reason'] = f'JSON parse error after AI retry: {str(e)}'
         except Exception as e:
             logging.error(f"Unexpected error parsing quick analysis response: {e}")
             result['reason'] = f'Parse error: {str(e)}'

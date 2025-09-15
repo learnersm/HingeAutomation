@@ -50,6 +50,7 @@ IMPORTANT:
         "decision": "ENGAGE",
         "comment": "That hiking pic is 🔥! What's your favorite trail?"
     }
+    
 """
 
 def get_step7_analysis_prompt():

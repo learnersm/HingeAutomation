@@ -16,7 +16,7 @@ class UIDetector:
             'cross': (810, 854),      # Cross button to skip profile
             'heart': (1107, 779),     # Heart/like button
             'comment_box': None,      # Comment text box (to be detected)
-            'send_button': None       # Send button (to be detected)
+            'send_button': (1047,552)       # Send button (to be detected)
         }
 
     def find_button_coordinates(self, button_name: str) -> Optional[Tuple[int, int]]:

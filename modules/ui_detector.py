@@ -105,11 +105,9 @@ class UIDetector:
         if coords and coords != (0, 0):
             return coords
         else:
-            # Calculate coordinates: right side, near bottom
-            send_x = window_bounds['width'] * 4 // 5  # Right side
-            send_y = window_bounds['height'] * 9 // 10  # Near bottom
-            logging.info(f"Calculated send button coordinates: ({send_x}, {send_y})")
-            return (send_x, send_y)
+            # Fallback to default if detection fails
+            logging.warning("Using fallback coordinates for heart button")
+            return (1047, 552)
 
 
 # Global instance for easy access

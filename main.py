@@ -78,17 +78,19 @@ def like_and_post_comment(comment: str, interaction_handler, ui_detector, screen
         text_box_x, text_box_y = ui_detector.get_comment_box_coords(interaction_handler.window_bounds)
         logging.info(f"Clicking comment text box at ({text_box_x}, {text_box_y})")
         interaction_handler.click_at(text_box_x, text_box_y)
-        time.sleep(0.5)
+        time.sleep(1)
 
         logging.info(f"Typing comment: {comment}")
         if not interaction_handler.type_text(comment):
             logging.error("Failed to type comment")
             return False
+        logging.info(f"Typing comment: {comment} task completed")
+        time.sleep(1)
 
         # Step 4: Send the comment
         send_x, send_y = ui_detector.get_send_button_coords(interaction_handler.window_bounds)
         logging.info(f"Posting comment: '{comment}'")
-        logging.info(f"Clicking send button at ({send_x}, {send_y})")
+        logging.info(f"Clicking send like button at ({send_x}, {send_y})")
         time.sleep(0.5)
 
         if not interaction_handler.click_at(send_x, send_y):

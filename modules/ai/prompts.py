@@ -22,34 +22,24 @@ Analyze ALL provided screenshots carefully. Consider both visual and textual con
 
 Respond with VALID JSON in this EXACT format:
 {
-  "rating": 8,
+  "rating": 8, // Just an example. Do a through review of the input and provide an accurate rating. Rating can be any integer between 1-10
   "reason": "Brief explanation of rating",
   "decision": "ENGAGE",
-  "comment": "witty comment under 150 chars, or N/A if NEXT_PROFILE"
+  "comment": "<add the comment here if decision is ENGAGE, otherwise N/A>"
 }
 
 IMPORTANT:
-- rating must be an integer between 1-10
+- Rating must be an integer between 1-10
 - decision must be either "ENGAGE" or "NEXT_PROFILE"
 - comment must be under 150 characters or "N/A"
 - Return ONLY valid JSON object, no additional text or formatting
     - Do not include ```json or any other markdown formatting in the response. 
     - Example : Incorrect reponse:
         ```json
-        {
-            "rating": 7,
-            "reason": "The person appears to be a woman in her late 20s/early 30s. She has a generally attractive appearance, and her photos suggest a fun, active lifestyle. Her profile text is well-written and engaging, indicating a thoughtful and confident personality.",
-            "decision": "ENGAGE",
-            "comment": "That hiking pic is 🔥! What's your favorite trail?"
-        }
+        <json object>
         ```
     - Example: Correct response:
-    {
-        "rating": 7,
-        "reason": "The person appears to be a woman in her late 20s/early 30s. She has a generally attractive appearance, and her photos suggest a fun, active lifestyle. Her profile text is well-written and engaging, indicating a thoughtful and confident personality.",
-        "decision": "ENGAGE",
-        "comment": "That hiking pic is 🔥! What's your favorite trail?"
-    }
+    <json object>
     
 """
 

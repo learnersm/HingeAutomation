@@ -8,3 +8,4 @@ pytesseract==0.3.10
 playsound==1.2.2
 ollama>=0.3.0
 imagehash==4.3.1
+Appium-Python-Client==2.11.1

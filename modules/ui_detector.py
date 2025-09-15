@@ -146,7 +146,7 @@ class UIDetector:
             ocr_text = pytesseract.image_to_string(image)
 
             # Log the OCR result for debugging
-            logging.info(f"OCR text from screenshot: {ocr_text}")
+            # logging.info(f"OCR text from screenshot: {ocr_text}")
 
             # Get the target text from config
             target_text = UI_TEXT_STRINGS.get("send_rose_instead", "send a rose instead")

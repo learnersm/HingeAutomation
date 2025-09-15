@@ -74,12 +74,12 @@ def like_and_post_comment(comment: str, interaction_handler, ui_detector, screen
             except Exception as e:
                 logging.debug(f"Could not clean up temporary screenshots: {e}")
 
-        # Step 3: Type the comment
-        text_box_x, text_box_y = ui_detector.get_comment_box_coords(interaction_handler.window_bounds)
-        logging.info(f"Clicking comment text box at ({text_box_x}, {text_box_y})")
-        interaction_handler.click_at(text_box_x, text_box_y)
+        # Step 3: Type the comment: Commenting below lines since text box is already focused after clicking heart
+        # text_box_x, text_box_y = ui_detector.get_comment_box_coords(interaction_handler.window_bounds)
+        # logging.info(f"Clicking comment text box at ({text_box_x}, {text_box_y})")
+        # interaction_handler.click_at(text_box_x, text_box_y)
+        
         time.sleep(1)
-
         logging.info(f"Typing comment: {comment}")
         if not interaction_handler.type_text(comment):
             logging.error("Failed to type comment")
@@ -106,8 +106,7 @@ def like_and_post_comment(comment: str, interaction_handler, ui_detector, screen
                 logging.warning("⚠️ ALERT: 'Send Rose Instead' screen detected!")
                 logging.warning("Clicking send like anyway button")
                 
-                send_x, send_y = ui_detector.get_send_button_coords(interaction_handler.window_bounds)
-                logging.info(f"Posting comment: '{comment}'")
+                send_x, send_y = ui_detector.get_send_like_anyway_coords(interaction_handler.window_bounds)
                 logging.info(f"Clicking send like button at ({send_x}, {send_y})")
                 time.sleep(0.5)
 

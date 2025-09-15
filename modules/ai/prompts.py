@@ -20,12 +20,36 @@ You are analyzing a Hinge dating profile from multiple screenshots. Your task is
 
 Analyze ALL provided screenshots carefully. Consider both visual and textual content.
 
-Respond in this EXACT format:
+Respond with VALID JSON in this EXACT format:
+{
+  "rating": 8,
+  "reason": "Brief explanation of rating",
+  "decision": "ENGAGE",
+  "comment": "witty comment under 150 chars, or N/A if NEXT_PROFILE"
+}
 
-RATING: X/10
-REASON: Brief explanation of rating
-DECISION: ENGAGE/NEXT_PROFILE
-COMMENT: [witty comment under 150 chars, or "N/A" if NEXT_PROFILE]
+IMPORTANT:
+- rating must be an integer between 1-10
+- decision must be either "ENGAGE" or "NEXT_PROFILE"
+- comment must be under 150 characters or "N/A"
+- Return ONLY valid JSON object, no additional text or formatting
+    - Do not include ```json or any other markdown formatting in the response. 
+    - Example : Incorrect reponse:
+        ```json
+        {
+            "rating": 7,
+            "reason": "The person appears to be a woman in her late 20s/early 30s. She has a generally attractive appearance, and her photos suggest a fun, active lifestyle. Her profile text is well-written and engaging, indicating a thoughtful and confident personality.",
+            "decision": "ENGAGE",
+            "comment": "That hiking pic is 🔥! What's your favorite trail?"
+        }
+        ```
+    - Example: Correct response:
+    {
+        "rating": 7,
+        "reason": "The person appears to be a woman in her late 20s/early 30s. She has a generally attractive appearance, and her photos suggest a fun, active lifestyle. Her profile text is well-written and engaging, indicating a thoughtful and confident personality.",
+        "decision": "ENGAGE",
+        "comment": "That hiking pic is 🔥! What's your favorite trail?"
+    }
 """
 
 def get_step7_analysis_prompt():

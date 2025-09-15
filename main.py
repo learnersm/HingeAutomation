@@ -218,215 +218,226 @@ def main():
         logging.info("Window and Hinge app preparation complete")
         print("Continuing with automation...")
 
-        # Step 5: Wait for first profile to load
-        print("\n" + "="*60)
-        print("STEP 5: WAITING FOR PROFILE TO LOAD")
-        print("="*60)
-        logging.info("Waiting for profile to load...")
-        time.sleep(TIMEOUTS["profile_load"])
-        logging.info("Profile load wait complete")
+        # Main profile processing loop
+        profile_count = 0
+        max_profiles = 20  # Safety limit to prevent infinite loops
 
-        # Step 6: Take screenshots of profile with scrolling
-        print("\n" + "="*60)
-        print("STEP 6: CAPTURING PROFILE SCREENSHOTS")
-        print("="*60)
+        while profile_count < max_profiles:
+            profile_count += 1
+            print(f"\n{'='*60}")
+            print(f"PROCESSING PROFILE #{profile_count}")
+            print(f"{'='*60}")
 
-        profile_screenshots = []
+            # Step 5: Wait for profile to load
+            print("\n" + "="*60)
+            print("STEP 5: WAITING FOR PROFILE TO LOAD")
+            print("="*60)
+            logging.info(f"Waiting for profile #{profile_count} to load...")
+            time.sleep(TIMEOUTS["profile_load"])
+            logging.info("Profile load wait complete")
 
-        # Take first screenshot
-        logging.info("Taking first profile screenshot")
-        first_screenshot = screenshot_handler.capture_screenshot("profile_001.png")
-        if first_screenshot:
-            profile_screenshots.append(first_screenshot)
-            logging.info(f"First screenshot captured: {first_screenshot}")
-        else:
-            logging.error("Failed to capture first screenshot")
-            return
+            # Step 6: Take screenshots of profile with scrolling
+            print("\n" + "="*60)
+            print("STEP 6: CAPTURING PROFILE SCREENSHOTS")
+            print("="*60)
 
-        # Quick analysis for pre-filtering
-        print("\n" + "="*60)
-        print("QUICK PROFILE ANALYSIS")
-        print("="*60)
-        logging.info("Performing quick analysis for profile filtering...")
+            profile_screenshots = []
 
-        quick_result = profile_analyzer.quick_analyze_profile([first_screenshot])
-        logging.info(f"Quick analysis result: Rating {quick_result['rating']}/10")
-        logging.info(f"Red flags detected: {quick_result['has_red_flags']}")
-
-        # Check if we should continue with full analysis
-        if not profile_analyzer.should_continue_full_analysis(quick_result):
-            logging.info("Profile filtered out by quick analysis - skipping to next profile")
-
-            # Skip to next profile by clicking cross
-            cross_x, cross_y = ui_detector.get_cross_button_coords()
-            logging.info(f"Using cross button coordinates: ({cross_x}, {cross_y})")
-
-            if interaction_handler.click_at(cross_x, cross_y):
-                logging.info("Cross clicked - moving to next profile")
-                # Wait for next profile to load
-                time.sleep(TIMEOUTS["profile_load"])
+            # Take first screenshot
+            logging.info("Taking first profile screenshot")
+            first_screenshot = screenshot_handler.capture_screenshot("profile_001.png")
+            if first_screenshot:
+                profile_screenshots.append(first_screenshot)
+                logging.info(f"First screenshot captured: {first_screenshot}")
             else:
-                logging.error("Failed to click cross button")
+                logging.error("Failed to capture first screenshot")
+                continue  # Skip to next profile instead of exiting
 
-            logging.info("Profile processing complete - quick filtered")
-            return  # Exit early, don't continue with full analysis
+            # Quick analysis for pre-filtering
+            print("\n" + "="*60)
+            print("QUICK PROFILE ANALYSIS")
+            print("="*60)
+            logging.info("Performing quick analysis for profile filtering...")
 
-        logging.info("Profile passed quick analysis - continuing with full screenshot capture")
+            quick_result = profile_analyzer.quick_analyze_profile([first_screenshot])
+            logging.info(f"Quick analysis result: Rating {quick_result['rating']}/10")
+            logging.info(f"Red flags detected: {quick_result['has_red_flags']}")
 
-        # Scroll and take more screenshots
-        max_scrolls = 10  # Prevent infinite loop
-        scroll_count = 0
-        consecutive_identical = 0  # Track consecutive identical screenshots
-        max_identical_threshold = 2  # Stop after 2 identical screenshots
+            # Check if we should continue with full analysis
+            if not profile_analyzer.should_continue_full_analysis(quick_result):
+                logging.info("Profile filtered out by quick analysis - skipping to next profile")
 
-        while scroll_count < max_scrolls:
-            # Perform full swipe (almost end to end screen)
-            start_y = dimensions['height'] * 9 // 10  # Near bottom
-            end_y = dimensions['height'] // 10       # Near top
-            center_x = dimensions['width'] // 2
+                # Skip to next profile by clicking cross
+                cross_x, cross_y = ui_detector.get_cross_button_coords()
+                logging.info(f"Using cross button coordinates: ({cross_x}, {cross_y})")
 
-            logging.info(f"Performing full scroll {scroll_count + 1}")
-            if not interaction_handler.swipe(center_x, start_y, center_x, end_y):
-                logging.error("Failed to perform scroll")
-                break
-
-            # Wait for scroll to complete
-            time.sleep(TIMEOUTS["scroll_wait"])
-
-            # Take new screenshot
-            screenshot_num = len(profile_screenshots) + 1
-            new_screenshot = screenshot_handler.capture_screenshot(f"profile_{screenshot_num:03d}.png")
-
-            if not new_screenshot:
-                logging.error("Failed to capture screenshot after scroll")
-                break
-
-            # Check if screenshot is different from the last one (end of profile detection)
-            if len(profile_screenshots) > 0:
-                last_screenshot = profile_screenshots[-1]
-                if screenshot_handler.compare_screenshots(last_screenshot, new_screenshot):
-                    consecutive_identical += 1
-                    logging.info(f"Screenshots are identical (count: {consecutive_identical}/{max_identical_threshold})")
-
-                    # If we've seen identical screenshots multiple times, we've reached the end
-                    if consecutive_identical >= max_identical_threshold:
-                        logging.info("Reached end of profile - stopping scroll")
-                        # Remove the identical screenshot
-                        os.remove(new_screenshot)
-                        break
-                    else:
-                        # Keep the screenshot but continue (might be temporary UI state)
-                        profile_screenshots.append(new_screenshot)
-                        logging.info(f"Screenshot captured (may be duplicate): {new_screenshot}")
+                if interaction_handler.click_at(cross_x, cross_y):
+                    logging.info("Cross clicked - moving to next profile")
+                    # Wait for next profile to load
+                    time.sleep(TIMEOUTS["profile_load"])
                 else:
-                    # Reset counter when we get different content
-                    consecutive_identical = 0
+                    logging.error("Failed to click cross button")
+
+                logging.info(f"Profile #{profile_count} processing complete - quick filtered")
+                continue  # Continue to next profile
+
+            logging.info("Profile passed quick analysis - continuing with full screenshot capture")
+
+            # Scroll and take more screenshots
+            max_scrolls = 10  # Prevent infinite loop
+            scroll_count = 0
+            consecutive_identical = 0  # Track consecutive identical screenshots
+            max_identical_threshold = 2  # Stop after 2 identical screenshots
+
+            while scroll_count < max_scrolls:
+                # Perform full swipe (almost end to end screen)
+                start_y = dimensions['height'] * 9 // 10  # Near bottom
+                end_y = dimensions['height'] // 10       # Near top
+                center_x = dimensions['width'] // 2
+
+                logging.info(f"Performing full scroll {scroll_count + 1}")
+                if not interaction_handler.swipe(center_x, start_y, center_x, end_y):
+                    logging.error("Failed to perform scroll")
+                    break
+
+                # Wait for scroll to complete
+                time.sleep(TIMEOUTS["scroll_wait"])
+
+                # Take new screenshot
+                screenshot_num = len(profile_screenshots) + 1
+                new_screenshot = screenshot_handler.capture_screenshot(f"profile_{screenshot_num:03d}.png")
+
+                if not new_screenshot:
+                    logging.error("Failed to capture screenshot after scroll")
+                    break
+
+                # Check if screenshot is different from the last one (end of profile detection)
+                if len(profile_screenshots) > 0:
+                    last_screenshot = profile_screenshots[-1]
+                    if screenshot_handler.compare_screenshots(last_screenshot, new_screenshot):
+                        consecutive_identical += 1
+                        logging.info(f"Screenshots are identical (count: {consecutive_identical}/{max_identical_threshold})")
+
+                        # If we've seen identical screenshots multiple times, we've reached the end
+                        if consecutive_identical >= max_identical_threshold:
+                            logging.info("Reached end of profile - stopping scroll")
+                            # Remove the identical screenshot
+                            os.remove(new_screenshot)
+                            break
+                        else:
+                            # Keep the screenshot but continue (might be temporary UI state)
+                            profile_screenshots.append(new_screenshot)
+                            logging.info(f"Screenshot captured (may be duplicate): {new_screenshot}")
+                    else:
+                        # Reset counter when we get different content
+                        consecutive_identical = 0
+                        profile_screenshots.append(new_screenshot)
+                        logging.info(f"New screenshot captured: {new_screenshot}")
+                else:
+                    # First scroll screenshot
                     profile_screenshots.append(new_screenshot)
                     logging.info(f"New screenshot captured: {new_screenshot}")
+
+                scroll_count += 1
+
+            logging.info(f"Profile screenshot capture complete. Total screenshots: {len(profile_screenshots)}")
+            for screenshot in profile_screenshots:
+                logging.info(f"Profile screenshot: {screenshot}")
+
+            # Remove the last screenshot if it's a duplicate (end of profile detection)
+            if len(profile_screenshots) > 1:
+                last_screenshot = profile_screenshots[-1]
+                second_last_screenshot = profile_screenshots[-2]
+
+                if screenshot_handler.compare_screenshots(second_last_screenshot, last_screenshot):
+                    logging.info("Removing duplicate last screenshot before AI analysis")
+                    # Remove the duplicate screenshot from the list
+                    removed_screenshot = profile_screenshots.pop()
+                    # Also remove the file from disk
+                    if os.path.exists(removed_screenshot):
+                        os.remove(removed_screenshot)
+                        logging.info(f"Removed duplicate screenshot file: {removed_screenshot}")
+
+            logging.info(f"Final screenshots for AI analysis: {len(profile_screenshots)}")
+            for screenshot in profile_screenshots:
+                logging.info(f"Analysis screenshot: {screenshot}")
+
+            # Step 7: Analyze profile and decide action
+            print("\n" + "="*60)
+            print("STEP 7: PROFILE ANALYSIS & ENGAGEMENT")
+            print("="*60)
+
+            # Analyze the profile using vision LLM
+            logging.info("Analyzing profile with AI...")
+            analysis_result = profile_analyzer.analyze_profile(profile_screenshots)
+
+            logging.info(f"Analysis result: Rating {analysis_result['rating']}/10, Decision: {analysis_result['decision']}")
+            logging.info(f"Reason: {analysis_result['reason']}")
+
+            # Make decision based on analysis
+            if profile_analyzer.should_engage_profile(analysis_result):
+                # Post the generated comment directly
+                logging.info("Engaging with profile - posting comment")
+                comment_success = like_and_post_comment(
+                    analysis_result['comment'],
+                    interaction_handler,
+                    ui_detector,
+                    screenshot_handler
+                )
+
+                if comment_success:
+                    logging.info("Comment posted successfully - waiting for next profile")
+                    # Wait for next profile to load
+                    time.sleep(TIMEOUTS["profile_load"])
+                else:
+                    logging.error("Failed to post comment")
+                    # Could implement retry logic here
             else:
-                # First scroll screenshot
-                profile_screenshots.append(new_screenshot)
-                logging.info(f"New screenshot captured: {new_screenshot}")
+                # Skip to next profile by clicking cross
+                logging.info("Skipping profile - clicking cross")
 
-            scroll_count += 1
+                # TODO : Later : Refactor this code to a function
+                # Take screenshot before clicking cross for comparison
+                before_cross_screenshot = screenshot_handler.capture_screenshot("before_cross_click.png")
 
-        logging.info(f"Profile screenshot capture complete. Total screenshots: {len(profile_screenshots)}")
-        for screenshot in profile_screenshots:
-            logging.info(f"Profile screenshot: {screenshot}")
+                # Get cross button coordinates from UI detector
+                cross_x, cross_y = ui_detector.get_cross_button_coords()
+                logging.info(f"Using cross button coordinates: ({cross_x}, {cross_y})")
 
-        # Remove the last screenshot if it's a duplicate (end of profile detection)
-        if len(profile_screenshots) > 1:
-            last_screenshot = profile_screenshots[-1]
-            second_last_screenshot = profile_screenshots[-2]
+                if interaction_handler.click_at(cross_x, cross_y):
+                    logging.info("Cross clicked - moving to next profile")
 
-            if screenshot_handler.compare_screenshots(second_last_screenshot, last_screenshot):
-                logging.info("Removing duplicate last screenshot before AI analysis")
-                # Remove the duplicate screenshot from the list
-                removed_screenshot = profile_screenshots.pop()
-                # Also remove the file from disk
-                if os.path.exists(removed_screenshot):
-                    os.remove(removed_screenshot)
-                    logging.info(f"Removed duplicate screenshot file: {removed_screenshot}")
+                    # Wait a moment for UI to respond
+                    time.sleep(1.0)
 
-        logging.info(f"Final screenshots for AI analysis: {len(profile_screenshots)}")
-        for screenshot in profile_screenshots:
-            logging.info(f"Analysis screenshot: {screenshot}")
+                    # Take screenshot after clicking cross to check if screen changed
+                    after_cross_screenshot = screenshot_handler.capture_screenshot("after_cross_click.png")
 
-        # Step 7: Analyze profile and decide action
-        print("\n" + "="*60)
-        print("STEP 7: PROFILE ANALYSIS & ENGAGEMENT")
-        print("="*60)
+                    if before_cross_screenshot and after_cross_screenshot:
+                        if screenshot_handler.compare_screenshots(before_cross_screenshot, after_cross_screenshot):
+                            logging.warning("⚠️ ALERT: No screen content change detected after clicking cross button!")
+                            logging.warning("The cross button click may have failed or the UI did not respond as expected")
+                        else:
+                            logging.info("Screen content changed after cross click - navigation successful")
 
-        # Analyze the profile using vision LLM
-        logging.info("Analyzing profile with AI...")
-        analysis_result = profile_analyzer.analyze_profile(profile_screenshots)
+                        # Clean up temporary screenshots
+                        try:
+                            if os.path.exists(before_cross_screenshot):
+                                os.remove(before_cross_screenshot)
+                            if os.path.exists(after_cross_screenshot):
+                                os.remove(after_cross_screenshot)
+                        except Exception as e:
+                            logging.debug(f"Could not clean up temporary screenshots: {e}")
 
-        logging.info(f"Analysis result: Rating {analysis_result['rating']}/10, Decision: {analysis_result['decision']}")
-        logging.info(f"Reason: {analysis_result['reason']}")
+                    # Wait for next profile to load
+                    time.sleep(TIMEOUTS["profile_load"])
+                else:
+                    logging.error("Failed to click cross button")
 
-        # Make decision based on analysis
-        if profile_analyzer.should_engage_profile(analysis_result):
-            # Post the generated comment directly
-            logging.info("Engaging with profile - posting comment")
-            comment_success = like_and_post_comment(
-                analysis_result['comment'],
-                interaction_handler,
-                ui_detector,
-                screenshot_handler
-            )
+            # Continue the loop for next profile
+            logging.info(f"Profile #{profile_count} processing complete - ready for next profile")
 
-            if comment_success:
-                logging.info("Comment posted successfully - waiting for next profile")
-                # Wait for next profile to load
-                time.sleep(TIMEOUTS["profile_load"])
-            else:
-                logging.error("Failed to post comment")
-                # Could implement retry logic here
-        else:
-            # Skip to next profile by clicking cross
-            logging.info("Skipping profile - clicking cross")
-
-            # TODO : Later : Refactor this code to a function
-            # Take screenshot before clicking cross for comparison
-            before_cross_screenshot = screenshot_handler.capture_screenshot("before_cross_click.png")
-
-            # Get cross button coordinates from UI detector
-            cross_x, cross_y = ui_detector.get_cross_button_coords()
-            logging.info(f"Using cross button coordinates: ({cross_x}, {cross_y})")
-
-            if interaction_handler.click_at(cross_x, cross_y):
-                logging.info("Cross clicked - moving to next profile")
-
-                # Wait a moment for UI to respond
-                time.sleep(1.0)
-
-                # Take screenshot after clicking cross to check if screen changed
-                after_cross_screenshot = screenshot_handler.capture_screenshot("after_cross_click.png")
-
-                if before_cross_screenshot and after_cross_screenshot:
-                    if screenshot_handler.compare_screenshots(before_cross_screenshot, after_cross_screenshot):
-                        logging.warning("⚠️ ALERT: No screen content change detected after clicking cross button!")
-                        logging.warning("The cross button click may have failed or the UI did not respond as expected")
-                    else:
-                        logging.info("Screen content changed after cross click - navigation successful")
-
-                    # Clean up temporary screenshots
-                    try:
-                        if os.path.exists(before_cross_screenshot):
-                            os.remove(before_cross_screenshot)
-                        if os.path.exists(after_cross_screenshot):
-                            os.remove(after_cross_screenshot)
-                    except Exception as e:
-                        logging.debug(f"Could not clean up temporary screenshots: {e}")
-
-                # Wait for next profile to load
-                time.sleep(TIMEOUTS["profile_load"])
-            else:
-                logging.error("Failed to click cross button")
-
-        # Continue the loop for next profile
-        # In a real implementation, this would be in a loop
-        logging.info("Profile processing complete - ready for next profile")
+        logging.info(f"Reached maximum profile limit of {max_profiles}. Stopping automation.")
 
     except Exception as e:
         logging.error(f"Main workflow error: {e}")

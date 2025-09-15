@@ -5,6 +5,7 @@ Handles image/text analysis and rating logic for Step 7
 
 import logging
 import re
+import json
 from typing import List, Dict, Any
 from config import RATING_THRESHOLD, MAX_RATING
 from ai.ai_manager import get_llm
@@ -67,55 +68,60 @@ class ProfileAnalyzer:
 
     def _parse_analysis_response(self, response: str) -> Dict[str, Any]:
         """
-        Parse the LLM response into structured data
+        Parse the LLM JSON response into structured data
 
         Args:
-            response: Raw LLM response
+            response: Raw LLM response (expected to be JSON)
 
         Returns:
             Parsed analysis result
         """
         result = {
-            'rating': 0,
+            'rating': 5,  # Default to middle rating
             'decision': 'NEXT_PROFILE',
             'comment': 'N/A',
-            'reason': 'Failed to parse response'
+            'reason': 'Failed to parse JSON response'
         }
 
         try:
-            lines = response.strip().split('\n')
+            # Try to parse as JSON
+            parsed_data = json.loads(response.strip())
+            logging.info(f"Logging parsed data: {parsed_data}")
 
-            for line in lines:
-                line = line.strip()
-                if line.startswith('RATING:'):
-                    # Extract rating (e.g., "RATING: 8/10" -> 8)
-                    rating_match = re.search(r'RATING:\s*(\d+)/10', line)
-                    if rating_match:
-                        result['rating'] = int(rating_match.group(1))
 
-                elif line.startswith('REASON:'):
-                    result['reason'] = line.replace('REASON:', '').strip()
+            # Extract fields from JSON
+            if 'rating' in parsed_data:
+                rating = parsed_data['rating']
+                if isinstance(rating, int) and 1 <= rating <= 10:
+                    result['rating'] = rating
+                else:
+                    logging.warning(f"Invalid rating value: {rating}, using default of 5")
+                    result['reason'] = f'Invalid rating value: {rating}, defaulting to 5'
 
-                elif line.startswith('DECISION:'):
-                    decision = line.replace('DECISION:', '').strip().upper()
-                    if decision in ['ENGAGE', 'NEXT_PROFILE']:
-                        result['decision'] = decision
+            if 'decision' in parsed_data:
+                decision = parsed_data['decision'].upper()
+                if decision in ['ENGAGE', 'NEXT_PROFILE']:
+                    result['decision'] = decision
+                else:
+                    logging.warning(f"Invalid decision value: {decision}")
 
-                elif line.startswith('COMMENT:'):
-                    comment = line.replace('COMMENT:', '').strip()
-                    if comment and comment != 'N/A':
-                        # Ensure comment is under 150 characters
-                        if len(comment) > 150:
-                            comment = comment[:147] + '...'
-                        result['comment'] = comment
+            if 'comment' in parsed_data:
+                comment = parsed_data['comment']
+                if comment and comment != 'N/A':
+                    # Ensure comment is under 150 characters
+                    if len(comment) > 150:
+                        comment = comment[:147] + '...'
+                    result['comment'] = comment
 
-            # Validate rating range
-            if not (1 <= result['rating'] <= 10):
-                result['rating'] = 5  # Default to middle rating
-                result['reason'] = 'Invalid rating, defaulting to 5'
+            if 'reason' in parsed_data:
+                result['reason'] = str(parsed_data['reason'])
 
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse JSON response: {e}")
+            logging.error(f"Raw response: {response}")
+            result['reason'] = f'JSON parse error: {str(e)}'
         except Exception as e:
-            logging.error(f"Failed to parse analysis response: {e}")
+            logging.error(f"Unexpected error parsing analysis response: {e}")
             result['reason'] = f'Parse error: {str(e)}'
 
         return result
@@ -185,40 +191,41 @@ class ProfileAnalyzer:
 
     def _parse_quick_analysis_response(self, response: str) -> Dict[str, Any]:
         """
-        Parse the quick analysis LLM response
+        Parse the quick analysis LLM JSON response
 
         Args:
-            response: Raw LLM response from quick analysis
+            response: Raw LLM response from quick analysis (expected to be JSON)
 
         Returns:
             Parsed quick analysis result
         """
         result = {
-            'rating': 0,
-            'reason': 'Failed to parse quick response'
+            'rating': 5,  # Default to middle rating
+            'reason': 'Failed to parse JSON quick response'
         }
 
         try:
-            lines = response.strip().split('\n')
+            # Try to parse as JSON
+            parsed_data = json.loads(response.strip())
 
-            for line in lines:
-                line = line.strip()
-                if line.startswith('RATING:'):
-                    # Extract rating (e.g., "RATING: 8/10" -> 8)
-                    rating_match = re.search(r'RATING:\s*(\d+)/10', line)
-                    if rating_match:
-                        result['rating'] = int(rating_match.group(1))
+            # Extract fields from JSON
+            if 'rating' in parsed_data:
+                rating = parsed_data['rating']
+                if isinstance(rating, int) and 1 <= rating <= 10:
+                    result['rating'] = rating
+                else:
+                    logging.warning(f"Invalid quick rating value: {rating}, using default of 5")
+                    result['reason'] = f'Invalid rating value: {rating}, defaulting to 5'
 
-                elif line.startswith('REASON:'):
-                    result['reason'] = line.replace('REASON:', '').strip()
+            if 'reason' in parsed_data:
+                result['reason'] = str(parsed_data['reason'])
 
-            # Validate rating range
-            if not (1 <= result['rating'] <= 10):
-                result['rating'] = 5  # Default to middle rating
-                result['reason'] = 'Invalid rating, defaulting to 5'
-
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse JSON quick response: {e}")
+            logging.error(f"Raw quick response: {response}")
+            result['reason'] = f'JSON parse error: {str(e)}'
         except Exception as e:
-            logging.error(f"Failed to parse quick analysis response: {e}")
+            logging.error(f"Unexpected error parsing quick analysis response: {e}")
             result['reason'] = f'Parse error: {str(e)}'
 
         return result

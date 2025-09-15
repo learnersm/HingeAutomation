@@ -96,6 +96,32 @@ def like_and_post_comment(comment: str, interaction_handler, ui_detector, screen
         if not interaction_handler.click_at(send_x, send_y):
             logging.error("Failed to send comment")
             return False
+        time.sleep(1.0)
+
+        # Check if intermediate screen is shown checking if user wants to send a rose instead of like
+        logging.info("Checking if 'send rose instead' screen appeared")
+        intermediate_screenshot = screenshot_handler.capture_screenshot("intermediate_send_rose_check.png") 
+        if intermediate_screenshot:
+            if ui_detector.is_send_rose_screen(intermediate_screenshot):
+                logging.warning("⚠️ ALERT: 'Send Rose Instead' screen detected!")
+                logging.warning("Clicking send like anyway button")
+                
+                send_x, send_y = ui_detector.get_send_button_coords(interaction_handler.window_bounds)
+                logging.info(f"Posting comment: '{comment}'")
+                logging.info(f"Clicking send like button at ({send_x}, {send_y})")
+                time.sleep(0.5)
+
+                if not interaction_handler.click_at(send_x, send_y):
+                    logging.error("Failed to send comment")
+                    return False
+                time.sleep(1.0)
+            else:
+                logging.info("No 'Send Rose Instead' screen detected")
+                try:
+                    if os.path.exists(intermediate_screenshot):
+                        os.remove(intermediate_screenshot)
+                except Exception as e:
+                    logging.debug(f"Could not clean up intermediate screenshot: {e}")
 
         # Wait for comment to post
         time.sleep(1.0)

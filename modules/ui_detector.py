@@ -5,6 +5,9 @@ Handles detection and location of UI elements like buttons on the screen
 
 import logging
 from typing import Dict, Tuple, Optional
+import pytesseract
+from PIL import Image
+from config import UI_TEXT_STRINGS
 
 class UIDetector:
     """
@@ -16,7 +19,8 @@ class UIDetector:
             'cross': (810, 854),      # Cross button to skip profile
             'heart': (1107, 779),     # Heart/like button
             'comment_box': None,      # Comment text box (to be detected)
-            'send_button': (1047,552)       # Send button (to be detected)
+            'send_button': (1047,552),      # Send button (to be detected)
+            'send_like_anyway': (984, 900)  # Send like anyway button, need on "send rose instead" intermediate screen
         }
 
     def find_button_coordinates(self, button_name: str) -> Optional[Tuple[int, int]]:
@@ -109,6 +113,63 @@ class UIDetector:
             logging.warning("Using fallback coordinates for heart button")
             return (1047, 552)
 
+    def get_send_like_anyway_coords(self) -> Tuple[int, int]:
+        """
+        Get coordinates of the send like anyway button
+
+        Returns:
+            Tuple of (x, y) coordinates for send like anyway button
+        """
+        coords = self.find_button_coordinates('send_like_anyway')
+        if coords:
+            return coords
+        else:
+            # Fallback to default if detection fails
+            logging.warning("Using fallback coordinates for send like anyway button")
+            return (984, 900)
+
+    def is_send_rose_screen(self, intermediate_screenshot: str) -> bool:
+        """
+        Check if the screenshot contains "send a rose instead" text using OCR
+
+        Args:
+            intermediate_screenshot: Path to the screenshot file to analyze
+
+        Returns:
+            bool: True if "send a rose instead" text is detected, False otherwise
+        """
+        try:
+            # Open the image
+            image = Image.open(intermediate_screenshot)
+
+            # Perform OCR on the image
+            ocr_text = pytesseract.image_to_string(image)
+
+            # Log the OCR result for debugging
+            logging.info(f"OCR text from screenshot: {ocr_text}")
+
+            # Get the target text from config
+            target_text = UI_TEXT_STRINGS.get("send_rose_instead", "send a rose instead")
+
+            # Check if target text is present (case-insensitive)
+            ocr_text_lower = ocr_text.lower()
+            target_text_lower = target_text.lower()
+
+            # Check for exact match or partial match
+            if target_text_lower in ocr_text_lower:
+                logging.info(f"✅ Found '{target_text}' in screenshot - this is a send rose screen")
+                return True
+            else:
+                logging.info(f"❌ '{target_text}' not found in screenshot")
+                return False
+
+        except Exception as e:
+            logging.error(f"Error performing OCR on screenshot {intermediate_screenshot}: {e}")
+            # Return False on any error to avoid false positives
+            return False
+        
+    
+    
 
 # Global instance for easy access
 _ui_detector = None

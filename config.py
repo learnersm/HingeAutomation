@@ -61,3 +61,12 @@ OLLAMA_CONFIG = {
     "timeout_s": 30,
     "max_retries": 2
 }
+
+# UI Text Detection Strings
+# Used for OCR-based detection of specific UI screens
+UI_TEXT_STRINGS = {
+    "send_rose_instead": "send a rose instead",
+    "send_like_anyway": "send like anyway",
+    "daily_limit_reached": "daily limit reached",
+    "profile_not_available": "profile not available"
+}

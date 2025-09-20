@@ -20,7 +20,8 @@ class UIDetector:
             'heart': (1107, 779),     # Heart/like button
             'comment_box': None,      # Comment text box (to be detected)
             'send_button': (1047,552),      # Send button (to be detected)
-            'send_like_anyway': (984, 900)  # Send like anyway button, need on "send rose instead" intermediate screen
+            'send_like_anyway': (984, 900),  # Send like anyway button, need on "send rose instead" intermediate screen
+            'ai_send_like': (1015, 518)  # Send like button on AI enabled reply options screen
         }
 
     def find_button_coordinates(self, button_name: str) -> Optional[Tuple[int, int]]:
@@ -128,6 +129,21 @@ class UIDetector:
             logging.warning("Using fallback coordinates for send like anyway button")
             return (984, 900)
 
+    def get_ai_send_like_button_coords(self) -> Tuple[int, int]:
+        """
+        Get coordinates of the AI enabled reply options send like button
+
+        Returns:
+            Tuple of (x, y) coordinates for AI send like button
+        """
+        coords = self.find_button_coordinates('ai_send_like')
+        if coords:
+            return coords
+        else:
+            # Fallback to default if detection fails
+            logging.warning("Using fallback coordinates for AI send like button")
+            return (1015, 518)
+
     def is_send_rose_screen(self, intermediate_screenshot: str) -> bool:
         """
         Check if the screenshot contains "send a rose instead" text using OCR
@@ -167,9 +183,56 @@ class UIDetector:
             logging.error(f"Error performing OCR on screenshot {intermediate_screenshot}: {e}")
             # Return False on any error to avoid false positives
             return False
-        
-    
-    
+
+    # Doesn't seem to work reliably, disabling for now, OCR does not parse small text
+    def is_ai_enabled_reply_screen(self, screenshot: str) -> bool:
+        """
+        Check if the screenshot contains AI enabled reply options text using OCR
+
+        Args:
+            screenshot: Path to the screenshot file to analyze
+
+        Returns:
+            bool: True if AI enabled reply screen is detected, False otherwise
+        """
+        try:
+            # Open the image
+            image = Image.open(screenshot)
+
+            # Perform OCR on the image
+            ocr_text = pytesseract.image_to_string(image)
+
+            # Log the OCR result for debugging
+            logging.info(f"OCR text from screenshot: {ocr_text}")
+
+            # Get the target texts from config
+            give_feedback_text = UI_TEXT_STRINGS.get("ai_enabled_reply_give_feedback", "Give feedback")
+            hinge_learning_text = UI_TEXT_STRINGS.get("ai_enabled_reply_hinge_learning", "Hinge is still learning")
+
+            # Check if either target text is present (case-insensitive)
+            ocr_text_lower = ocr_text.lower()
+            give_feedback_lower = give_feedback_text.lower()
+            hinge_learning_lower = hinge_learning_text.lower()
+
+            # Check for either indicator text
+            if give_feedback_lower in ocr_text_lower:
+                logging.info(f"✅ Found '{give_feedback_text}' in screenshot - this is an AI enabled reply screen")
+                return True
+            elif hinge_learning_lower in ocr_text_lower:
+                logging.info(f"✅ Found '{hinge_learning_text}' in screenshot - this is an AI enabled reply screen")
+                return True
+            else:
+                logging.info(f"❌ Neither '{give_feedback_text}' nor '{hinge_learning_text}' found in screenshot")
+                return False
+
+        except Exception as e:
+            logging.error(f"Error performing OCR on screenshot {screenshot}: {e}")
+            # Return False on any error to avoid false positives
+            return False
+
+
+
+
 
 # Global instance for easy access
 _ui_detector = None

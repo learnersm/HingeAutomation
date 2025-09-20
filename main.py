@@ -87,16 +87,23 @@ def like_and_post_comment(comment: str, interaction_handler, ui_detector, screen
         logging.info(f"Typing comment: {comment} task completed")
         time.sleep(1)
 
-        # Step 4: Send the comment
+        # Atleast one of these will work - hack, TODO : Fix long in long term
+        # Use normal send button
         send_x, send_y = ui_detector.get_send_button_coords(interaction_handler.window_bounds)
-        logging.info(f"Posting comment: '{comment}'")
-        logging.info(f"Clicking send like button at ({send_x}, {send_y})")
-        time.sleep(0.5)
-
+        logging.info(f"Normal screen approach - using regular send button at ({send_x}, {send_y})")
+        logging.info(f"Clicking send button with comment: '{comment}'")
         if not interaction_handler.click_at(send_x, send_y):
-            logging.error("Failed to send comment")
+            logging.error("Failed to send comment") # TODO: This will never get triggerd. Fix
             return False
-        time.sleep(1.0)
+
+        # Use AI enabled reply options send like button
+        send_x, send_y = ui_detector.get_ai_send_like_button_coords()
+        logging.info(f"AI enabled reply screen approach - using AI send like button at ({send_x}, {send_y})")
+        logging.info(f"Clicking send button with comment: '{comment}'")
+        if not interaction_handler.click_at(send_x, send_y):
+            logging.error("Failed to send comment") # TODO: This will never get triggerd. Fix
+            return False
+        time.sleep(0.5)
 
         # Check if intermediate screen is shown checking if user wants to send a rose instead of like
         logging.info("Checking if 'send rose instead' screen appeared")
@@ -247,7 +254,7 @@ def main():
 
         # Main profile processing loop
         profile_count = 0
-        max_profiles = 20  # Safety limit to prevent infinite loops
+        max_profiles = 9  # Safety limit to prevent infinite loops
 
         while profile_count < max_profiles:
             profile_count += 1

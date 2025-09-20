@@ -68,5 +68,9 @@ UI_TEXT_STRINGS = {
     "send_rose_instead": "send a rose instead",
     "send_like_anyway": "send like anyway",
     "daily_limit_reached": "daily limit reached",
-    "profile_not_available": "profile not available"
+    "profile_not_available": "profile not available",
+    # AI enabled reply options screen text strings
+    "ai_enabled_reply_give_feedback": "Give feedback",
+    "ai_enabled_reply_hinge_learning": "Hinge is still learning"
+
 }

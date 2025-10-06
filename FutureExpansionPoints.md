@@ -8,7 +8,7 @@ Work end to end for an app. Hinge to start with
 - Fix the analysis results, right now its defaulting to 5 - most likely because of errors during parsing.
 - Create a setting to allows allow [or always reject] - in case people are desperate and want to sent request to everyone, especially for people with premium
 - Add net time taken for a single profile evaluation
-- Need to scroll horizontally so that i can fetch the entire content of Hinge's screen. Especially the drinks, weed etc section
+- Need to scroll horizontally so that i can fetch the entire content of Hinge's screen. Especially the drinks, smoke etc section
 - Right now execution stops after crossing out a profile, it should continue till limit of profiles reached for the day
 - Get scrcpy to work across networks , and in other devices by using the solution in this issue : "https://github.com/Genymobile/scrcpy/issues/5794"
 

@@ -2,6 +2,7 @@
 User Preferences Configuration
 Science-based green flags and red flags for profile filtering
 Based on relationship research and compatibility studies
+Random data used which is non reflective of any real individuals
 """
 
 # Quick Rating Threshold

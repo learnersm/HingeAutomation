@@ -2,6 +2,33 @@
 
 Automated interaction system for the Hinge dating app using scrcpy device mirroring.
 
+## ⚠️ IMPORTANT LEGAL & ETHICAL DISCLAIMERS
+
+### 🚫 Legal Disclaimer
+**This software is provided for educational and research purposes only.** The author is not responsible for any misuse, violations of terms of service, account suspensions, bans, or any other consequences arising from the use of this software.
+
+**POTENTIAL VIOLATION OF TERMS OF SERVICE:** Using automation tools with dating apps may violate Hinge's Terms of Service, Community Guidelines, and/or other applicable platform policies. Users are solely responsible for ensuring their usage complies with all applicable laws, regulations, and platform terms. The author explicitly disclaims any liability for violations or consequences resulting from use of this software.
+
+### 🤖 Ethical Usage Guidelines
+- **Respect Consent & Privacy:** Do not use this tool to harass, spam, or disrespect other users
+- **Human-like Behavior:** Avoid excessive automation that could be detected as non-human activity
+- **Rate Limiting:** Respect daily profile limits and platform-imposed restrictions
+- **No Discrimination:** Ensure AI-generated content does not promote bias, harassment, or inappropriate behavior
+- **Responsible AI Use:** Monitor and verify AI-generated comments before they are sent
+
+### 🔒 Privacy & Security Notices
+- **Local Processing Only:** All AI analysis and processing occurs locally on your device using Ollama
+- **No Data Collection:** This software does not collect, transmit, or store personal data from profiles
+- **Screenshot Security:** Profile screenshots are temporarily stored locally and automatically cleaned up
+- **Device Security:** Ensure your Android device and USB connection are secure
+- **Account Safety:** Using automation increases risk of account detection and suspension
+
+### ⚠️ Safety Warnings
+- **Account Risk:** Hinge may suspend or ban accounts detected using automation
+- **Legal Compliance:** Ensure compliance with local laws regarding automation and data processing
+- **No Warranty:** This software is provided "AS IS" without any warranties
+- **Use at Your Own Risk:** The author is not liable for any damages or losses incurred
+
 ## Features
 
 - Automated profile browsing and rating

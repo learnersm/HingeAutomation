@@ -14,7 +14,7 @@ You are analyzing a Hinge dating profile from multiple screenshots. Your task is
    - Overall appeal and compatibility potential
    - Presentation and effort in profile
 
-3. DECISION: If rating >= 6, create a witty, personalized comment under 150 characters. If rating < 6, recommend skipping to next profile.
+3. DECISION: If rating >= 6, create a witty, personalized comment under 140 characters. If rating < 6, recommend skipping to next profile.
 
 4. COMMENT: If engaging, make it charming, specific to their profile, and conversation-starting, and slightly humourous / flirty.
 
@@ -23,7 +23,7 @@ Analyze ALL provided screenshots carefully. Consider both visual and textual con
 Respond with VALID JSON in this EXACT format:
 {
   "rating": 8, // Just an example. Do a through review of the input and provide an accurate rating. Rating can be any integer between 1-10
-  "reason": "Brief explanation of rating",
+  "reason": "Brief explanation of rating. Be original and really understand the different attributes of the person",
   "decision": "ENGAGE",
   "comment": "<add the comment here if decision is ENGAGE, otherwise N/A>"
 }
@@ -31,7 +31,7 @@ Respond with VALID JSON in this EXACT format:
 IMPORTANT:
 - Rating must be an integer between 1-10
 - decision must be either "ENGAGE" or "NEXT_PROFILE"
-- comment must be under 150 characters or "N/A"
+- comment must be under 140 characters or "N/A"
 - Return ONLY valid JSON object, no additional text or formatting
     - Do not include ```json or any other markdown formatting in the response. 
     - Example : Incorrect reponse:

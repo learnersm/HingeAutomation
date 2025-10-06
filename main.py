@@ -19,7 +19,7 @@ from profile_analyzer import ProfileAnalyzer
 
 from error_handler import ErrorHandler
 from ui_detector import get_ui_detector
-from config import TIMEOUTS
+from config import STRING_TO_INDICATE_AI_GENERATED_MESSAGE, TIMEOUTS
 
 def like_and_post_comment(comment: str, interaction_handler, ui_detector, screenshot_handler) -> bool:
     """
@@ -404,6 +404,7 @@ def main():
             # Analyze the profile using vision LLM
             logging.info("Analyzing profile with AI...")
             analysis_result = profile_analyzer.analyze_profile(profile_screenshots)
+            final_comment = analysis_result['comment'] + STRING_TO_INDICATE_AI_GENERATED_MESSAGE
 
             logging.info(f"Analysis result: Rating {analysis_result['rating']}/10, Decision: {analysis_result['decision']}")
             logging.info(f"Reason: {analysis_result['reason']}")
@@ -413,7 +414,7 @@ def main():
                 # Post the generated comment directly
                 logging.info("Engaging with profile - posting comment")
                 comment_success = like_and_post_comment(
-                    analysis_result['comment'],
+                    final_comment,
                     interaction_handler,
                     ui_detector,
                     screenshot_handler

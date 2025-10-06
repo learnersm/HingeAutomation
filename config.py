@@ -62,6 +62,8 @@ OLLAMA_CONFIG = {
     "max_retries": 2
 }
 
+STRING_TO_INDICATE_AI_GENERATED_MESSAGE = "-AI gen"
+
 # UI Text Detection Strings
 # Used for OCR-based detection of specific UI screens
 UI_TEXT_STRINGS = {
